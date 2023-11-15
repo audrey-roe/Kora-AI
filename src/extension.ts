@@ -291,22 +291,22 @@ function findIndentationLevel(content: string, index: number): number {
 
 async function filesRecursive(directory: string, allowedExtensions: string[], excludedFolders: string[] = ['node_modules', 'dist', 'out', 'lib'], testFilePattern: RegExp = /\.(test|spec)\.(ts|js|py)$/): Promise<string[]> {
     let fileArray: string[] = [];
-  
+
     const files = await vscode.workspace.fs.readDirectory(vscode.Uri.file(directory));
-  
+
     for (const [name, type] of files) {
-      const fullPath = path.join(directory, name);
-  
-      if (type === vscode.FileType.File && allowedExtensions.includes(path.extname(fullPath)) && !testFilePattern.test(name)) {
-        fileArray.push(fullPath);
-      } else if (type === vscode.FileType.Directory && !excludedFolders.includes(name)) {
-        fileArray = fileArray.concat(await filesRecursive(fullPath, allowedExtensions, excludedFolders, testFilePattern));
-      }
+        const fullPath = path.join(directory, name);
+
+        if (type === vscode.FileType.File && allowedExtensions.includes(path.extname(fullPath)) && !testFilePattern.test(name)) {
+            fileArray.push(fullPath);
+        } else if (type === vscode.FileType.Directory && !excludedFolders.includes(name)) {
+            fileArray = fileArray.concat(await filesRecursive(fullPath, allowedExtensions, excludedFolders, testFilePattern));
+        }
     }
-  
+
     return fileArray;
-  }
-  
+}
+
 
 function isCommentedOut(content: string, index: number): boolean {
     // Check if the match is within a comment block
@@ -493,26 +493,25 @@ async function locateExpressController(controllerName: string): Promise<{ module
 function findEndOfBlock(content: string, startIndex: number): number {
     let openBraces = 0;
     let i = startIndex;
-  
+
     while (i < content.length) {
-      if (content[i] === '{') {
-        openBraces++;
-      } else if (content[i] === '}') {
-        openBraces--;
-  
-        if (openBraces === 0) {
-          return i;
+        if (content[i] === '{') {
+            openBraces++;
+        } else if (content[i] === '}') {
+            openBraces--;
+
+            if (openBraces === 0) {
+                return i;
+            }
         }
-      }
-  
-      i++;
-  
-      // If a closing brace is encountered before an opening brace, break to avoid false positives
-      if (openBraces < 0) {
-        break;
-      }
+
+        i++;
+
+        // If a closing brace is encountered before an opening brace, break to avoid false positives
+        if (openBraces < 0) {
+            break;
+        }
     }
-  
+
     return -1; // Not found
-  }
-  
+}
