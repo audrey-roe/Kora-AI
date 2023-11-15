@@ -1,12 +1,26 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
+import { TextDecoder } from 'util';
+import { extractControllers } from './service/identity.service';
+import { controllerExtractor } from './service/assistant.service';
 
-interface DjangoView {
+// CommonView interface
+interface CommonView {
     name: string;
     content: {
         moduleName: string;
         functionName: string;
+        content: string;
+    } | string;
+}
+
+// DjangoView interface
+interface DjangoView extends CommonView {
+    content: {
+        moduleName: string;
+        functionName: string;
+        content: string;
     } | string;
 }
 
@@ -19,6 +33,8 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showInformationMessage(`${identifiedFramework} framework has been identified!`);
             if (identifiedFramework === 'Django') {
                 processDjangoProject();
+            } else if (identifiedFramework === 'Express') {
+                processExpressProject();
             }
         } else {
             vscode.window.showInformationMessage("No framework detected");
@@ -98,17 +114,6 @@ async function processDjangoProject() {
     }
 }
 
-// function for generating documentation for Django views
-function generateDocumentation(views: DjangoView[]) {
-    // Iterating over the list of Django views and generate documentation
-    for (const view of views) {
-        // Customize this part based on how you want to document each view
-        vscode.window.showInformationMessage(`Generating documentation for Django View: ${view.name}`);
-    }
-
-    // Additional logic or aggregation to be performed here.
-}
-
 async function identifyDjangoViews(urlsFile: vscode.Uri) {
     const fileContent = await vscode.workspace.fs.readFile(urlsFile);
 
@@ -145,6 +150,7 @@ async function identifyDjangoViews(urlsFile: vscode.Uri) {
     return views;
 }
 
+
 async function locateViewFunction(viewName: string): Promise<{ moduleName: string, functionName: string, content: string } | undefined> {
     const workspaceFolders = vscode.workspace.workspaceFolders;
 
@@ -168,7 +174,7 @@ async function locateViewFunction(viewName: string): Promise<{ moduleName: strin
     const functionName = parts[parts.length - 1];
 
     // Recursively search for Python files in the project directory
-    const pythonFiles = filesRecursive(workspacePath, allowedExtensions);
+    const pythonFiles = await filesRecursive(workspacePath, allowedExtensions);
     const viewFunctionRegex = new RegExp(`(?:def\\s+${functionName}\\s*\\([^:]*:\\s*|class\\s+${functionName}\\s*(?:\\([^)]*\\))?\\s*(?:\\b(?:APIView)\\b)?\\s*:\\s*)[^]*?(?=(?:\\s*class\\s+|\\s*def\\s+))|(?=$)`, 'g');
 
     // Check each Python file for the view function definition
@@ -218,6 +224,7 @@ async function locateViewFunction(viewName: string): Promise<{ moduleName: strin
     vscode.window.showErrorMessage(`View function for ${viewName} not found.`);
     return undefined;
 }
+
 
 function findEndOfFunction(content: string, startIndex: number): number {
     let openBraces = 0;
@@ -281,31 +288,25 @@ function findIndentationLevel(content: string, index: number): number {
 }
 
 // Function to recursively find files with specified extensions
-function filesRecursive(dir: string, extensions: string[]): string[] {
-    const files: string[] = [];
 
-    function walk(currentDir: string) {
-        const entries = fs.readdirSync(currentDir);
-
-        for (const entry of entries) {
-            const fullPath = path.join(currentDir, entry);
-            const stat = fs.statSync(fullPath);
-
-            if (stat.isDirectory()) {
-                walk(fullPath);
-            } else {
-                const ext = path.extname(entry);
-
-                if (extensions.includes(ext)) {
-                    files.push(fullPath);
-                }
-            }
-        }
+async function filesRecursive(directory: string, allowedExtensions: string[], excludedFolders: string[] = ['node_modules', 'dist', 'out', 'lib'], testFilePattern: RegExp = /\.(test|spec)\.(ts|js|py)$/): Promise<string[]> {
+    let fileArray: string[] = [];
+  
+    const files = await vscode.workspace.fs.readDirectory(vscode.Uri.file(directory));
+  
+    for (const [name, type] of files) {
+      const fullPath = path.join(directory, name);
+  
+      if (type === vscode.FileType.File && allowedExtensions.includes(path.extname(fullPath)) && !testFilePattern.test(name)) {
+        fileArray.push(fullPath);
+      } else if (type === vscode.FileType.Directory && !excludedFolders.includes(name)) {
+        fileArray = fileArray.concat(await filesRecursive(fullPath, allowedExtensions, excludedFolders, testFilePattern));
+      }
     }
-
-    walk(dir);
-    return files;
-}
+  
+    return fileArray;
+  }
+  
 
 function isCommentedOut(content: string, index: number): boolean {
     // Check if the match is within a comment block
@@ -357,3 +358,161 @@ function isWithinVirtualEnv(filePath: string): boolean {
 
     return false;
 }
+
+// function for generating documentation for Django views
+function generateDocumentation(views: CommonView[]) {
+    // Iterating over the list of views and generate documentation
+    for (const view of views) {
+        // Customize this part based on how you want to document each view
+        vscode.window.showInformationMessage(`Generating documentation for View: ${view.name}`);
+    }
+
+    // Additional logic or aggregation to be performed here.
+}
+
+async function identifyExpressRoutes(): Promise<string[] | undefined> {
+    const expressRouteFiles = await vscode.workspace.findFiles('**/routes.ts', '**/routes.js');
+
+    if (expressRouteFiles.length === 0) {
+        vscode.window.showInformationMessage('No Express route files found, if your routes file exists make sure it is named `routes.ts` or `routes.js` in your Express app.');
+        return undefined;
+    }
+
+    const routeFilePaths = expressRouteFiles.map(file => file.fsPath);
+    vscode.window.showInformationMessage(`Express route files found: ${routeFilePaths.join(', ')}`);
+
+    return routeFilePaths;
+}
+
+
+async function processExpressProject() {
+    try {
+        const expressRoutes = await identifyExpressRoutes();
+
+        if (expressRoutes) {
+            for (const route of expressRoutes) {
+                try {
+                    const document = await vscode.workspace.openTextDocument(route);
+                    // await controllerExtractor();
+                    // await extractControllers(document);
+                    await checkControllers()
+                } catch (error) {
+                    console.error(`Error opening ${route} for processing:`, error);
+                    vscode.window.showErrorMessage(`Error opening ${route} for processing`);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error identifying express routes:', error);
+        vscode.window.showErrorMessage('Error identifying express routes');
+    }
+}
+
+const controllers = [
+    'loginUserHandler',
+    'createUserHandler',
+    'deleteUserHandler',
+    'revokeSession',
+    'getFileHandler',
+    'streamFileController',
+    'uploadFileHandler',
+    'handleCreateFolder',
+    'markAndDeleteUnsafeFileController',
+    'getFileHistoryController',
+    'reviewFile',
+];
+
+async function checkControllers() {
+    for (const controller of controllers) {
+        try {
+            const result = await locateExpressController(controller);
+            if (result) {
+                vscode.window.showInformationMessage(`Controller ${controller} found`);
+            }
+        } catch (error) {
+            console.error(`Error checking controller ${controller}: `, error);
+        }
+    }
+}
+
+
+async function locateExpressController(controllerName: string): Promise<{ moduleName: string, functionName: string, content: string } | undefined> {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+
+    if (!workspaceFolders || workspaceFolders.length === 0) {
+        vscode.window.showErrorMessage('Workspace path not found.');
+        return undefined;
+    }
+
+    // Assuming the first folder is the root of the workspace
+    const workspacePath = workspaceFolders[0].uri.fsPath;
+
+    // Define the file extensions to search
+    const allowedExtensions = ['.ts', '.js'];
+
+    // Convert dots in the controller name to path separators
+    const controllerPath = controllerName.replace(/\./g, path.sep);
+
+    // Split the controller name into module and function names
+    const parts = controllerName.split('.');
+    const moduleName = parts.slice(0, -1).join('.');
+    const functionName = parts[parts.length - 1];
+
+    // Recursively search for TypeScript and JavaScript files in the project directory
+    const sourceFiles = await filesRecursive(workspacePath, allowedExtensions);
+
+    // Check each file for the controller function definition
+    for (const sourceFile of sourceFiles) {
+        const content = await vscode.workspace.fs.readFile(vscode.Uri.file(sourceFile)).then(buffer => new TextDecoder().decode(buffer));
+
+        const functionRegex = new RegExp(`(?:\\b${functionName}\\s*=\\s*(?:async\\s*)?\\([^)]*\\)\\s*=>\\s*|\\b${functionName}\\s*\\([^)]*\\)\\s*(?:=>\\s*|\\{\\s*)|\\bconst\\s+${functionName}\\s*\\=|\\bexport\\s+(?:async\\s+)?(?:function\\s+)?(?:const\\s+)?\\b${functionName}\\s*\\(\\s*|\\b${functionName}\\s*\\(\\s*)`, 'g');
+
+        // Check each TypeScript/JavaScript file for the controller function definition
+        const matches = content.match(functionRegex);
+
+        if (matches) {
+            for (const match of matches) {
+                // Find the end of the function block
+                const startIndex = content.indexOf(match);
+                const endOfBlock = findEndOfBlock(content, startIndex);
+
+                if (endOfBlock !== -1) {
+                    const viewContent = content.substring(startIndex, endOfBlock + 1);
+                    vscode.window.showInformationMessage(`Module name: ${moduleName}, Function name: ${functionName}, Content: ${viewContent}`);
+                    return { moduleName, functionName, content: viewContent };
+                }
+            }
+        }
+    }
+
+    vscode.window.showErrorMessage(`Controller function for ${controllerName} not found.`);
+    return undefined;
+}
+
+// Function to find the ending of a block in TypeScript or JavaScript file
+function findEndOfBlock(content: string, startIndex: number): number {
+    let openBraces = 0;
+    let i = startIndex;
+  
+    while (i < content.length) {
+      if (content[i] === '{') {
+        openBraces++;
+      } else if (content[i] === '}') {
+        openBraces--;
+  
+        if (openBraces === 0) {
+          return i;
+        }
+      }
+  
+      i++;
+  
+      // If a closing brace is encountered before an opening brace, break to avoid false positives
+      if (openBraces < 0) {
+        break;
+      }
+    }
+  
+    return -1; // Not found
+  }
+  
