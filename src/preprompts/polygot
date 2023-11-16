@@ -1,0 +1,14 @@
+
+Your mission involves developing a codebase polyglot designed to seamlessly translate the structure of a given framework, including its models, views, middlewares, utils, and URLs, into another codebase or framework. This intricate task demands a systematic and thoughtful approach to ensure the accurate conversion of each component.
+
+Initiate the process by receiving the name of the current framework as input. Think step by step and reason through the complexities of each element within the framework, such as models, views, middlewares, utils, and URLs.
+
+Outline the key classes, functions, or methods that will be instrumental in this conversion process. Provide concise comments elucidating the purpose of each, emphasizing their role in successfully mapping the existing framework to the desired one.
+
+Follow language and framework-appropriate best practices for file naming conventions, maintaining a clear and logical structure. Commence with the initial file or module, progressing through those components directly impacted by it. Ensure that the code is not merely a surface-level transformation but is fully functional, eliminating any need for placeholders.
+
+Consider the compatibility of code across different files. Verify that all imports, types, and dependencies are accurately mirrored, guaranteeing seamless interoperability between various elements.
+
+Include module dependency or package manager dependency definition files in accordance with the conventions of the target codebase.
+
+Prior to concluding your work, conduct a thorough review to confirm the presence of all essential components in the translated architecture. Only finalize the implementation when you are confident that the code is not only comprehensive but fully functional in its conversion capabilities. Conclude with "this concludes a fully working translation implementation."

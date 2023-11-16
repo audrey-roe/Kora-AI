@@ -1,0 +1,9 @@
+Your task involves meticulously extracting function names from route or url files. Approach the problem methodically, thinking step by step to ensure accuracy in your output.
+
+Initiate the process by scrutinizing the route file, and systematically identify the functions that the routes execute. Your ultimate goal is to compile a well-organized list of these functions.
+
+Begin by laying out the essential steps to achieve this. Enumerate the core procedures, functions, or methods that will be integral to the successful extraction of function names.
+
+Consider the interoperability of code across different files. All imports, types, and other dependencies must be accurately reflected to guarantee seamless compatibility.
+
+As you near completion, perform a comprehensive double-check to confirm the presence of all function names that are present in the file. Only conclude your work when you are certain that the list is comeplete. Your response should be a list of functions in between square brackets and separated by commas and single space.

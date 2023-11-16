@@ -1,0 +1,78 @@
+<!-- Your task is to generate documentation for a RESTful API systematically, focusing on one endpoint at a time. The documentation for each endpoint should be comprehensive, providing essential information in a structured manner.
+
+For each endpoint, follow this format:
+
+Endpoint Name: Clearly state the name of the endpoint.
+Request Method and URL: Specify the HTTP request method and the endpoint URL side by side.
+Description: Provide a concise, single-line description of the endpoint, elucidating its primary purpose and functionality.
+Request Body (if POST): If the request method is POST, outline the expected request body, including the required fields and their types.
+Returns: Clearly describe what the endpoint returns, highlighting any significant information about the response.
+Example Request: Present an example of a valid request to the endpoint, showcasing the necessary parameters and their values.
+Example Response: Provide an example of a typical response from the endpoint, illustrating the structure and content.
+Ensure that the documentation is clear, consistent, and adheres to best practices. Maintain a logical order for presenting information, making it easy for developers to understand and implement.
+
+When generating the documentation, consider the nuances of POST requests, making explicit any required fields in the request body. Additionally, emphasize the importance of the response structure by including a representative example.
+
+Conclude your documentation generation with a clear statement indicating the completion of documentation for the given endpoint. -->
+
+
+Your task involves generating documentation for each endpoint of an API, focusing on a one-endpoint-at-a-time approach. The documentation for each endpoint should be comprehensive, providing key details in a structured format.
+
+For each endpoint:
+
+1. **Name of the Endpoint:**
+   Clearly specify the name of the endpoint.
+
+2. **Request Method and Endpoint URL:**
+   Present the HTTP request method (e.g., GET, POST) and the endpoint URL in a concise and easily readable format.
+
+3. **Single Line Description:**
+   Provide a brief, one-line description of the endpoint's purpose and functionality.
+
+4. **Request Body (if applicable):**
+   If the endpoint involves a POST request, detail the required fields in the request body.
+
+5. **Returns:**
+   Clarify what the endpoint returns, whether it's data, status codes, or other relevant information.
+
+6. **Example Request and Response:**
+   If applicable, include an example request and response. Format these within a clear black box or another visually distinct container for easy identification.
+
+Here is a template to guide your documentation generation:
+
+```plaintext
+**[Endpoint Name]**
+
+**[HTTP Method] [Endpoint URL]** 
+
+[One-line description]
+
+**Request Body (if POST):** 
+    [Field Name] [*required -if the field is required]
+    [Field Description].
+
+    [Field Name 2] [*required -if the field is required]
+    [Field Description 2].
+
+**Returns:** [Description of what the endpoint returns]
+
+**Example Request:**
+```json
+{
+  "exampleField1": "exampleValue1",
+  "exampleField2": "exampleValue2",
+  ...
+}
+```
+
+**Example Response:**
+```json
+{
+  "responseField1": "responseValue1",
+  "responseField2": "responseValue2",
+  ...
+}
+```
+```
+
+Ensure consistency in formatting and provide sufficient detail for developers to understand the purpose and usage of each endpoint. Conclude each documentation entry with a clear indication that the documentation for that specific endpoint is complete.

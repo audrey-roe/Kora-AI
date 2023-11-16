@@ -1,17 +1,10 @@
-// djangoUtils.ts
 import * as vscode from 'vscode';
-import { extractViewContent, isCommentedOut, isWithinVirtualEnv } from './utils';
+import { TextDecoder } from 'util';
+import { locateViewFunction } from '../utils/view-utils';
+import { isWithinVirtualEnv } from '../service/identity.service';
+import { isCommentedOut } from '../utils/file-utils';
 
-export interface DjangoView {
-    name: string;
-    content: {
-        moduleName: string;
-        functionName: string;
-    } | string;
-}
-
-
-export async function identifyDjangoViews(urlsFile: vscode.Uri): Promise<DjangoView[]> {
+export async function identifyDjangoViews(urlsFile: vscode.Uri) {
     const fileContent = await vscode.workspace.fs.readFile(urlsFile);
 
     // Use a regex to identify Django views
@@ -33,8 +26,11 @@ export async function identifyDjangoViews(urlsFile: vscode.Uri): Promise<DjangoV
         if (viewName && !viewName.includes('include') && path !== 'admin/' && !isCommentedOut(fileContentString, match.index) && !isWithinVirtualEnv(filePath)) {
             vscode.window.showInformationMessage(`Django View identified - Path: ${path}, View Name: ${viewName}, File Path: ${filePath}`);
 
-            // Extract the content of the view function or class
-            const viewContent = extractViewContent(fileContentString, viewName);
+            // Call locateViewFunction to get the content of the view function
+            const viewContent = await locateViewFunction(viewName);
+
+            // vscode.window.showInformationMessage(`View content ${viewContent}`);
+
             if (viewContent) {
                 views.push({ name: viewName, content: viewContent });
             }
@@ -44,14 +40,4 @@ export async function identifyDjangoViews(urlsFile: vscode.Uri): Promise<DjangoV
     return views;
 }
 
-export function generateDocumentation(views: DjangoView[]) {
-    // Iterate over the list of Django views and generate documentation
-    for (const view of views) {
-        // Customize this part based on how you want to document each view
-        vscode.window.showInformationMessage(`Generating documentation for Django View: ${view.name}`);
-        // Example: Call a documentation generation function or send the information to OpenAI.
-    }
-
-    // Additional logic or aggregation can be performed here.
-}
 
