@@ -24,18 +24,56 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     context.subscriptions.push(disposable);
-    const provider = vscode.authentication.registerAuthenticationProvider(
-        'github',
-        'GitHub',
-        {
-            onDidChangeSessions: new vscode.EventEmitter<vscode.AuthenticationProviderAuthenticationSessionsChangeEvent>().event,
-            getSessions: () => { /* Implement session retrieval logic */ return []; },
-            login: async (scopes: string[]) => { /* Implement login logic */ return { accessToken: 'YOUR_ACCESS_TOKEN' }; },
-            logout: async (sessionId: string) => { /* Implement logout logic */ }
-        }
-    );
 
-    context.subscriptions.push(provider);
+    // const provider = vscode.authentication.registerAuthenticationProvider(
+    //     'github',
+    //     'GitHub',
+    //     {
+    //         onDidChangeSessions: new vscode.EventEmitter<vscode.AuthenticationProviderAuthenticationSessionsChangeEvent>().event,
+    //         getSessions: () => {
+    //           // Implement session retrieval logic if needed
+    //           return [];
+    //         },
+    //         login: async (scopes: string[]) => {
+    //             // Check if 'repo' and 'workflow' scopes are included
+    //             if (!scopes.includes('repo') || !scopes.includes('workflow')) {
+    //               // If not, request them
+    //               scopes.push('repo', 'workflow');
+    //             }
+        
+    //             // Implement login logic
+    //             const token = await performGitHubLogin(scopes);
+        
+    //             // You may want to use the token to perform other GitHub API operations
+    //             const octokit = new github.Octokit({
+    //               auth: token.accessToken,
+    //             });
+        
+    //             // Create a repository
+    //             const repoName = 'your-repo-name';
+    //             await octokit.repos.createForAuthenticatedUser({ name: repoName });
+        
+    //             // Commit to the repository
+    //             const commitMessage = 'Initial commit';
+    //             await octokit.repos.createOrUpdateFile({
+    //               owner: 'your-username',
+    //               repo: repoName,
+    //               path: 'test-file.txt',
+    //               message: commitMessage,
+    //               content: Buffer.from('Hello, World!').toString('base64'),
+    //             });
+        
+    //             return token;
+    //           return { accessToken: 'YOUR_ACCESS_TOKEN' };
+    //         },
+    //         logout: async (sessionId: string) => {
+    //           // Implement logout logic
+    //     }
+    // );
+    // context.subscriptions.push(provider);
+
+    
+
     const githubDisposable = vscode.commands.registerCommand('extension.createGitHubRepo', () => {
         authenticateWithGitHub();
       });
