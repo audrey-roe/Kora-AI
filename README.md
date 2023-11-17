@@ -1,18 +1,18 @@
-# Kodev README
+# Kora AI README
 
-This is the README for the "Kodev" extension.
+This is the README for the "Kora AI" extension.
 
 ## Features
 
-Kodev is a versatile extension designed to enhance your coding experience with the following key features:
+Kora AI is a versatile extension designed to enhance your coding experience with the following key features:
 
 ### Codebase Polyglot
 
-- **Code Conversion:** Seamlessly convert code from one programming language to another. Whether you're transitioning between languages or collaborating with a team using different tech stacks, Kodev has you covered.
+- **Code Conversion:** Seamlessly convert code from one programming language to another. Whether you're transitioning between languages or collaborating with a team using different tech stacks, Kora AI has you covered.
 
 ### Documentation Generator
 
-- **Automated Documentation:** Generate comprehensive documentation for your codebase with ease. Kodev intelligently analyzes your code and creates documentation, saving you time and ensuring your projects stay well-documented.
+- **Automated Documentation:** Generate comprehensive documentation for your codebase with ease. Kora AI intelligently analyzes your code and creates documentation, saving you time and ensuring your projects stay well-documented.
 
 ### Function Finder
 
@@ -26,28 +26,28 @@ Kodev is a versatile extension designed to enhance your coding experience with t
 
 ### Intelligent Indentation Handling
 
-- **Accurate Indentation:** Kodev accurately detects the indentation level of functions, providing a comprehensive view and ensuring correct formatting.
+- **Accurate Indentation:** Kora AI accurately detects the indentation level of functions, providing a comprehensive view and ensuring correct formatting.
 
 ## Requirements
 
-There are no specific requirements or dependencies for the Kodev extension. Simply install and start using it right away!
+There are no specific requirements or dependencies for the Kora AI extension. Simply install and start using it right away!
 
 ## Extension Settings
 
-Kodev contributes the following settings:
+Kora AI contributes the following settings:
 
-- `kodev.helloWorld`: Enable/disable the Kodev extension.
-<!-- - `kodev.viewFinderDepth`: Set the depth of search when using the view function finder. -->
+- `Kora AI.helloWorld`: Enable/disable the Kora AI extension.
+<!-- - `Kora AI.viewFinderDepth`: Set the depth of search when using the view function finder. -->
 
 ## Known Issues
 
-No known issues at the moment. Please report any encountered problems on the [GitHub repository](https://github.com/yourusername/kodev).
+No known issues at the moment. Please report any encountered problems on the [GitHub repository](https://github.com/yourusername/Kora AI).
 
 ## Release Notes
 
 ### 1.0.0
 
-- Initial release of the Kodev extension, introducing core features for polyglot code conversion, documentation generation, and Python development support.
+- Initial release of the Kora AI extension, introducing core features for polyglot code conversion, documentation generation, and Python development support.
 
 ### 1.0.1
 
@@ -61,7 +61,7 @@ No known issues at the moment. Please report any encountered problems on the [Gi
 
 ## Following Extension Guidelines
 
-Ensure that you've read through the [extensions guidelines](https://code.visualstudio.com/api/references/extension-guidelines) and follow best practices when using Kodev.
+Ensure that you've read through the [extensions guidelines](https://code.visualstudio.com/api/references/extension-guidelines) and follow best practices when using Kora AI.
 
 ## Working with Markdown
 
@@ -76,4 +76,4 @@ You can author your README using Visual Studio Code. Here are some useful editor
 - [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
 - [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
 
-**Enjoy coding with Kodev!**
+**Enjoy coding with Kora AI!**

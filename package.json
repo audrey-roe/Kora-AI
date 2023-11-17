@@ -10,6 +10,7 @@
     "Other"
   ],
   "activationEvents": [
+    "onCommand:kodekraftai.generateDocumentation",
     "onLanguage:python",
     "onLanguage:javascript",
     "onLanguage:typescript"
@@ -18,7 +19,7 @@
   "contributes": {
     "commands": [
       {
-        "command": "kodekraftai.helloWorld",
+        "command": "kodekraftai.generateDocumentation",
         "title": "KodeKraftAI"
       }
     ]
