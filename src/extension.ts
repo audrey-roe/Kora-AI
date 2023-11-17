@@ -5,10 +5,9 @@ import { identifyDjangoViews } from './django/django-views';
 import { generateDocumentation } from './service/assistant.service';
 import { authenticateWithGitHub } from './service/github.service';
 
-
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand('kodekraftai.generateDocumentation', async () => {
-        vscode.window.showInformationMessage('KodekraftAI is now running!'); //helloWorld
+        vscode.window.showInformationMessage('KodekraftAI is now running!');
 
         const identifiedFramework = await identifyCodebaseFramework();
         if (identifiedFramework) {
@@ -25,17 +24,60 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(disposable);
 
-    const githubDisposable = vscode.commands.registerCommand('kodekraftai.createGitHubRepo', () => {
+    const githubDisposable = vscode.commands.registerCommand('kodekraftai.loginGithub', () => {
         authenticateWithGitHub();
-      });
+    });
 
     let polygotDisposable = vscode.commands.registerCommand('kodekraftai.polygot', () => {
         vscode.window.showInformationMessage('New command is executed!');
         // Add your logic for the new command here
     });
 
-    context.subscriptions.push(polygotDisposable);
+    const checkLoginCommand = vscode.commands.registerCommand('kodekraftai.convertCodebase', async () => {
+        let isLoggedIn;
 
+        const session = await vscode.authentication.getSession('github', ['repo', 'workflow', 'read:user']);
+        if(session){
+            const isLoggedIn = true 
+
+        }else{
+            const isLoggedIn = false 
+        }
+
+        if (!isLoggedIn) {
+            vscode.window.showInformationMessage('Sign in to Kora AI to use the convert codebase feature!', 'Continue with Github')
+                .then((selectedItem) => {
+                    if (selectedItem === 'Continue with Github') {
+                        authenticateWithGitHub();
+                    }
+                });
+        }
+    });
+
+
+    context.subscriptions.push(polygotDisposable);
+    context.subscriptions.push(checkLoginCommand);
+
+}
+
+
+function getWebviewContent(panel: vscode.WebviewPanel) {
+    const extensionUri = vscode.extensions.getExtension('kodekraftai.kodekraftai')!.extensionUri;
+    const scriptUri = panel.webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'index.js'));
+
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>GitHub Login</title>
+        </head>
+        <body>
+            <h2>GitHub Login</h2>
+            <button onclick="login()">Login with GitHub</button>
+            <script src="${scriptUri}"></script>
+        </body>
+        </html>
+    `;
 }
 
 export function deactivate() { }
@@ -51,19 +93,4 @@ async function processDjangoProject() {
             generateDocumentation(views);
         }
     }
-}
-
-
-async function identifyExpressRoutes(): Promise<string[] | undefined> {
-    const expressRouteFiles = await vscode.workspace.findFiles('**/routes.ts', '**/routes.js');
-
-    if (expressRouteFiles.length === 0) {
-        vscode.window.showInformationMessage('No Express route files found, if your routes file exists make sure it is named `routes.ts` or `routes.js` in your Express app.');
-        return undefined;
-    }
-
-    const routeFilePaths = expressRouteFiles.map(file => file.fsPath);
-    vscode.window.showInformationMessage(`Express route files found: ${routeFilePaths.join(', ')}`);
-
-    return routeFilePaths;
 }

@@ -57,3 +57,26 @@ export async function assistantCreator() {
         outputChannel.show(true);
     }
 }
+
+async function convertCodebase(): Promise<void> {
+    // Check if the user is logged in
+    const isLoggedIn = await checkGitHubLoginStatus();
+  
+    if (isLoggedIn) {
+      // Perform the code conversion logic
+      vscode.window.showInformationMessage('Converting codebase...');
+      // Add your code conversion logic here
+    } else {
+      // User is not logged in, prompt for GitHub login
+      vscode.window.showInformationMessage('Please log in with GitHub before converting codebase.');
+    }
+}
+
+async function checkGitHubLoginStatus(): Promise<boolean> {
+    // Implement the logic to check if the user is logged in
+    // You might want to check if there is a valid access token or any other relevant criteria
+    // Return true if logged in, false otherwise
+  
+    return true;
+}
+  

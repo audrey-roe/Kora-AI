@@ -11,6 +11,7 @@
   ],
   "activationEvents": [
     "onCommand:kodekraftai.generateDocumentation",
+    "onCommand:kodekraftai.convertCodebase",
     "onLanguage:python",
     "onLanguage:javascript",
     "onLanguage:typescript"
@@ -20,7 +21,11 @@
     "commands": [
       {
         "command": "kodekraftai.generateDocumentation",
-        "title": "KodeKraftAI"
+        "title": "Kora AI: Generate Documentation"
+      },
+      {
+        "command": "kodekraftai.convertCodebase",
+        "title": "Kora AI: Convert Codebase"
       }
     ]
   },
@@ -48,13 +53,14 @@
   },
   "dependencies": {
     "@octokit/auth-oauth-app": "^7.0.1",
+    "@octokit/oauth-app": "^6.0.0",
     "@octokit/rest": "^20.0.2",
     "@types/config": "^3.3.3",
-    "@types/estree": "^1.0.5",
-    "config": "^3.3.9",
     "dotenv": "^16.3.1",
-    "esprima": "^4.0.1",
     "esrecurse": "^4.3.0",
-    "openai": "^4.18.0"
+    "fast-xml-parser": "^4.3.2",
+    "langchain": "^0.0.192",
+    "openai": "^4.18.0",
+    "zod": "^3.22.4"
   }
 }

@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 import OpenAI, { ClientOptions } from "openai";
+import config from '../config/defaults';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const apiKey: string | undefined = process.env.OPENAI_3;
+const apiKey: string | undefined = config.OPENAI_3;
 
 if (!apiKey) {
     throw new Error("OpenAI API key is not provided.");

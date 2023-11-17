@@ -44,7 +44,6 @@ async function findDjangoRoutes() {
             return;
         }
     }
-
     // If no Django routes are found, display a message
     vscode.window.showInformationMessage('No Django framework routes found.');
 }

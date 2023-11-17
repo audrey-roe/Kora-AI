@@ -1,19 +1,13 @@
 import * as vscode from 'vscode';
 import { Octokit } from "@octokit/rest";
-import dotenv from 'dotenv';
-import {
-    createOAuthAppAuth,
-    createOAuthUserAuth,
-} from "@octokit/auth-oauth-app"
 
-dotenv.config();
-
-
+import config from '../config/defaults';
+import fetch from "node-fetch";
 
 // OAuth App details
-const clientId = process.env.GITHUB_CLIENT_ID;
-const clientSecret = process.env.GITHUB_CLIENT_SECRET;
-const redirectUri = process.env.GITHUB_REDIRECT_URI;
+const clientId = config.GITHUB_CLIENT_ID;
+const clientSecret = config.GITHUB_CLIENTSECRET;
+const redirectUri = config.GITHUB_REDIRECT_URL;
 const octokitInstance =
     new Octokit({
         auth: process.env.GITHUB_CLIENT_SECRET,
@@ -26,54 +20,46 @@ const octokitInstance =
             error: console.error
         },
         request: {
-            agent: undefined,
-            fetch: undefined,
-            timeout: 0
+            fetch: fetch,
         }
     });
-
-
 export async function authenticateWithGitHub() {
-   
-    const loginUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=repo,workflow`;
-    await vscode.env.openExternal(vscode.Uri.parse(loginUrl));
 
-    // Capture the authorization code (using the onDidChangeWindowState event or other event)
-    // Exchange the authorization code for an access token
-    const authorizationCode = await vscode.window.showInputBox({ prompt: 'Enter GitHub Authorization Code' });
+    try {
+        const loginUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=repo,workflow`;
+        const response = await vscode.env.openExternal(vscode.Uri.parse(loginUrl));
+        let accessToken
+        // const response = await octokitInstance.request('POST /login/oauth/access_token', {
+        //     client_id: clientId,
+        //     client_secret: clientSecret,
+        //     code: authorizationCode,
+        //     redirect_uri: redirectUri,
+        // });
+        // const accessToken = response.data.access_token;
 
-    if (authorizationCode) {
-        try {
-            const response = await octokitInstance.request('POST /login/oauth/access_token', {
-                client_id: clientId,
-                client_secret: clientSecret,
-                code: authorizationCode,
-                redirect_uri: redirectUri,
-            });
+        // vscode.window.showInformationMessage(`GitHub login user access token: ${accessToken}`);
 
-            const accessToken = response.data.access_token;
+        // Use the accessToken to perform Git commands or GitHub API requests
+        // octokitInstance.auth = {
+            // token: accessToken,
+            // type: 'token',
+        // };
 
-            // Use the accessToken to perform Git commands or GitHub API requests
-            // octokitInstance.auth = {
-            //     token: accessToken,
-            //     type: 'token',
-            // };
+        // Return the authentication session
+        return {
+            id: 'session-id',
+            accessToken: accessToken,
+            scopes: ['repo', 'workflow'],
+        };
+        // const { data } = await octokitInstance.request("/user");
+        // vscode.window.showInformationMessage(`GitHub login user access token: ${data}`);
 
-            // Return the authentication session
-            return {
-                id: 'session-id',
-                accessToken: accessToken,
-                scopes: ['repo', 'workflow'],
-            };
-        } catch (error) {
-            console.error('GitHub login error:', error);
-            throw error;
-        }
-    } else {
-        throw new Error('Authorization code not provided');
+    } catch (error) {
+        vscode.window.showInformationMessage(`GitHub login error: ${error}`);
+        throw error;
     }
-}
 
+}
 
 async function pollForToken(deviceCodeData: any): Promise<any> {
     // Implement polling logic to obtain the access token using deviceCodeData
@@ -92,24 +78,23 @@ export async function createGitHubRepository(token: vscode.AuthenticationSession
     const octokit = new Octokit({
         auth: token.accessToken,
     });
-
     // Create a repository
     const repoCreationResponse = await (octokit.repos as any).createForAuthenticatedUser({ name: repoName, description: description, });
     vscode.window.showInformationMessage(`Repository created: ${repoCreationResponse.data.html_url}`);
 }
 
-export async function commitToGitHubRepository(token: vscode.AuthenticationSession, repoName: string, owner: string): Promise<void> {
+export async function commitToGitHubRepository(token: vscode.AuthenticationSession, repoName: string, owner: string, content: string): Promise<void> {
     const octokit = new Octokit({
         auth: token.accessToken,
     });
 
     // Commit to the repository
-    const commitMessage = 'chore: (First Commit) Boiler Creation';
+    const commitMessage = 'chore: (First Commit) Converted codebase';
     await (octokit.repos as any).createOrUpdateFile({
         owner: owner,
         repo: repoName,
         path: 'test-file.txt',
         message: commitMessage,
-        content: Buffer.from('Hello, World!').toString('base64'), // have to read the documentation and use this feature for codebase implementation
+        content: Buffer.from(content).toString('base64'), // have to read the documentation and use this feature for codebase implementation
     });
 }

@@ -36,7 +36,7 @@ There are no specific requirements or dependencies for the Kora AI extension. Si
 
 Kora AI contributes the following settings:
 
-- `Kora AI.helloWorld`: Enable/disable the Kora AI extension.
+- `Kora AI`: Enable/disable the Kora AI extension.
 <!-- - `Kora AI.viewFinderDepth`: Set the depth of search when using the view function finder. -->
 
 ## Known Issues

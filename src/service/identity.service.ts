@@ -83,7 +83,6 @@ export function isWithinDjangoProject(filePath: string): boolean {
     );
 }
 
-
 export function isWithinVirtualEnv(filePath: string): boolean {
     // exclude common patterns for virtual environment folders
     const virtualEnvPatterns = ['venv', '.venv', 'env'];

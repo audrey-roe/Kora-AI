@@ -75,4 +75,4 @@ Here is a template to guide your documentation generation:
 ```
 ```
 
-Ensure consistency in formatting and provide sufficient detail for developers to understand the purpose and usage of each endpoint. Conclude each documentation entry with a clear indication that the documentation for that specific endpoint is complete.
+Ensure that the documentation is clear, consistent, and adheres to best practices. Maintain a logical order for presenting information, making it easy for developers to understand and implement. When generating the documentation, consider the nuances of POST requests, making explicit any required fields in the request body. Additionally, emphasize the importance of the response structure by including a representative example. Conclude each documentation entry with a clear indication that the documentation for that specific endpoint is complete.
