@@ -8,58 +8,91 @@ import fetch from "node-fetch";
 const clientId = config.GITHUB_CLIENT_ID;
 const clientSecret = config.GITHUB_CLIENTSECRET;
 const redirectUri = config.GITHUB_REDIRECT_URL;
-const octokitInstance =
-    new Octokit({
-        auth: process.env.GITHUB_CLIENT_SECRET,
-        timeZone: 'Africa/Lagos',
-        baseUrl: 'https://api.github.com',
-        log: {
-            debug: () => { },
-            info: () => { },
-            warn: console.warn,
-            error: console.error
-        },
-        request: {
-            fetch: fetch,
-        }
-    });
+const octokitInstance = new Octokit({
+    auth: process.env.GITHUB_CLIENT_SECRET,
+    timeZone: 'Africa/Lagos',
+    baseUrl: 'https://api.github.com',
+    log: {
+        debug: () => { },
+        info: () => { },
+        warn: console.warn,
+        error: console.error
+    },
+    request: {
+        fetch: fetch,
+    }
+});
+
 export async function authenticateWithGitHub() {
-
     try {
-        const loginUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=repo,workflow`;
-        const response = await vscode.env.openExternal(vscode.Uri.parse(loginUrl));
-        let accessToken
-        // const response = await octokitInstance.request('POST /login/oauth/access_token', {
-        //     client_id: clientId,
-        //     client_secret: clientSecret,
-        //     code: authorizationCode,
-        //     redirect_uri: redirectUri,
-        // });
-        // const accessToken = response.data.access_token;
+        const loginUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=read:user,repo,workflow`;
 
-        // vscode.window.showInformationMessage(`GitHub login user access token: ${accessToken}`);
+        await vscode.env.openExternal(vscode.Uri.parse(loginUrl));
 
-        // Use the accessToken to perform Git commands or GitHub API requests
-        // octokitInstance.auth = {
-            // token: accessToken,
-            // type: 'token',
-        // };
+        const code = await vscode.window.showInputBox({
+            prompt: 'Enter the code from GitHub authentication',
+            ignoreFocusOut: true,
+        });
 
-        // Return the authentication session
+        if (!code) {
+            throw new Error('GitHub authentication code not provided.');
+        }
+
+        const accessTokenResponse = await exchangeCodeForAccessToken(code, clientId, redirectUri);
+
+        const accessToken = accessTokenResponse.access_token;
+
+        vscode.window.showInformationMessage(`GitHub login user access token: ${accessToken}`);
+
+        octokitInstance.auth = async () => {
+            return {
+                token: accessToken,
+                type: 'token',
+            };
+        };
+
         return {
             id: 'session-id',
             accessToken: accessToken,
             scopes: ['repo', 'workflow'],
         };
-        // const { data } = await octokitInstance.request("/user");
-        // vscode.window.showInformationMessage(`GitHub login user access token: ${data}`);
-
-    } catch (error) {
-        vscode.window.showInformationMessage(`GitHub login error: ${error}`);
+    } catch (error:any) {
+        vscode.window.showInformationMessage(`GitHub login error: ${error.message}`);
         throw error;
     }
-
 }
+
+async function exchangeCodeForAccessToken(code: string, clientId: string, redirectUri: string) {
+    const tokenUrl = 'https://github.com/login/oauth/access_token';
+    const response = await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: 'Exchanging GitHub code for access token',
+        cancellable: false,
+    }, async () => {
+        const data = new URLSearchParams({
+            client_id: clientId,
+            redirect_uri: redirectUri,
+            code: code,
+        });
+
+        const result = await fetch(tokenUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: data,
+        });
+
+        if (!result.ok) {
+            throw new Error(`Failed to exchange code for access token: ${result.statusText}`);
+        }
+
+        return result.json();
+    });
+
+    return response;
+}
+
 
 async function pollForToken(deviceCodeData: any): Promise<any> {
     // Implement polling logic to obtain the access token using deviceCodeData
