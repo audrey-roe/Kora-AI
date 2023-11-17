@@ -3,14 +3,13 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const apiKey: string | undefined = process.env.OPENAI_3;
-// const apiKey = "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"
 
 if (!apiKey) {
   throw new Error("OpenAI API key is not provided.");
 }
 const openai = new OpenAI({ key: apiKey } as ClientOptions);
 
-// function to generate documentation using GPT-3
+// function to generate documentation using GPT, //TODO: change implementation instead of chat completion use, openai assistant
 export async function generateDocumentation(code: string): Promise<string> {
     try {
     const completionParams = {
@@ -30,10 +29,10 @@ export async function generateDocumentation(code: string): Promise<string> {
   }
 }
 
-// function to convert code using GPT-3
+// function to convert code using GPT
 export async function convertCode(code: string, targetLanguage: string): Promise<string> {
   try {
-    // Use the GPT-3 API to convert code
+
     const response = await openai.completions.create({
       model: 'text-davinci-002', // Use an appropriate engine
       prompt: `Convert the following code to ${targetLanguage}:\n\n${code}`,

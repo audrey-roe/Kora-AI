@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
 import * as path from 'path'
 import { filesRecursive } from './file-utils';
 
@@ -14,22 +13,17 @@ export async function locateViewFunction(viewName: string): Promise<{ moduleName
     // Assuming the first folder is the root of the workspace
     const workspacePath = workspaceFolders[0].uri.fsPath;
 
-    // Define the file extensions to search
     const allowedExtensions = ['.py'];
 
-    // Convert dots in the view name to path separators
     const viewPath = viewName.replace(/\./g, path.sep);
 
-    // Split the view name into module and function names
     const parts = viewName.split('.');
     const moduleName = parts.slice(0, -1).join('.');
     const functionName = parts[parts.length - 1];
 
-    // Recursively search for Python files in the project directory
     const pythonFiles = await filesRecursive(workspacePath, allowedExtensions);
     const viewFunctionRegex = new RegExp(`(?:def\\s+${functionName}\\s*\\([^:]*:\\s*|class\\s+${functionName}\\s*(?:\\([^)]*\\))?\\s*(?:\\b(?:APIView)\\b)?\\s*:\\s*)[^]*?(?=(?:\\s*class\\s+|\\s*def\\s+))|(?=$)`, 'g');
 
-    // Check each Python file for the view function definition
     for (const pythonFile of pythonFiles) {
         const content = await vscode.workspace.fs.readFile(vscode.Uri.file(pythonFile)).then(buffer => new TextDecoder().decode(buffer));
 
@@ -92,27 +86,21 @@ export function findEndOfFunction(content: string, startIndex: number): number {
             openBraces--;
 
             if (openBraces === 0 && insideFunction) {
-                // Check if the closing parenthesis is followed by a newline
                 if (content[i + 1] === '\n') {
-                    // Find the indentation level of the current line
                     if (initialIndentation === null) {
                         initialIndentation = findIndentationLevel(content, startIndex);
                     }
 
-                    // Find the start of the next line after the closing parenthesis
                     let nextLineIndex = i + 2;
-                    let nextLineIndentation = 0;  // Initialize indentation for the next line
+                    let nextLineIndentation = 0; 
 
-                    // Find the indentation level of the next line
                     while (nextLineIndex < content.length && content[nextLineIndex] !== '\n') {
                         functionContent += content[nextLineIndex];
                         nextLineIndex++;
                         nextLineIndentation++;
                     }
 
-                    // Check if the next line has the same or lower indentation
                     if (nextLineIndentation <= initialIndentation) {
-                        // Stop and return from the line before the next line
                         return nextLineIndex - 1;
                     }
                 }
@@ -122,14 +110,13 @@ export function findEndOfFunction(content: string, startIndex: number): number {
         i++;
     }
 
-    return -1; // Not found
+    return -1; 
 }
 
 export function findIndentationLevel(content: string, index: number): number {
     let i = index;
     let indentationLevel = 0;
 
-    // Count the number of spaces or tabs at the beginning of the line
     while (i > 0 && (content[i - 1] === ' ' || content[i - 1] === '\t')) {
         indentationLevel++;
         i--;
@@ -146,30 +133,23 @@ export async function locateExpressController(controllerName: string): Promise<{
         return undefined;
     }
 
-    // Assuming the first folder is the root of the workspace
     const workspacePath = workspaceFolders[0].uri.fsPath;
 
-    // Define the file extensions to search
     const allowedExtensions = ['.ts', '.js'];
 
-    // Convert dots in the controller name to path separators
     const controllerPath = controllerName.replace(/\./g, path.sep);
 
-    // Split the controller name into module and function names
     const parts = controllerName.split('.');
     const moduleName = parts.slice(0, -1).join('.');
     const functionName = parts[parts.length - 1];
 
-    // Recursively search for TypeScript and JavaScript files in the project directory
     const sourceFiles = await filesRecursive(workspacePath, allowedExtensions);
 
-    // Check each file for the controller function definition
     for (const sourceFile of sourceFiles) {
         const content = await vscode.workspace.fs.readFile(vscode.Uri.file(sourceFile)).then(buffer => new TextDecoder().decode(buffer));
 
         const functionRegex = new RegExp(`(?:\\b${functionName}\\s*=\\s*(?:async\\s*)?\\([^)]*\\)\\s*=>\\s*|\\b${functionName}\\s*\\([^)]*\\)\\s*(?:=>\\s*|\\{\\s*)|\\bconst\\s+${functionName}\\s*\\=|\\bexport\\s+(?:async\\s+)?(?:function\\s+)?(?:const\\s+)?\\b${functionName}\\s*\\(\\s*|\\b${functionName}\\s*\\(\\s*)`, 'g');
 
-        // Check each TypeScript/JavaScript file for the controller function definition
         const matches = content.match(functionRegex);
 
         if (matches) {
@@ -190,6 +170,7 @@ export async function locateExpressController(controllerName: string): Promise<{
     vscode.window.showErrorMessage(`Controller function for ${controllerName} not found.`);
     return undefined;
 }
+
 // Function to find the ending of a block in TypeScript or JavaScript file
 export function findEndOfBlock(content: string, startIndex: number): number {
     let openBraces = 0;
@@ -217,6 +198,7 @@ export function findEndOfBlock(content: string, startIndex: number): number {
     return -1; // Not found
 }
 
+//TODO: get open ai to work so that we can remove this placeholder
 const controllers = [
     'loginUserHandler',
     'createUserHandler',

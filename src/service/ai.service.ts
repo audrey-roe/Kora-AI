@@ -3,14 +3,13 @@ import OpenAI, { ClientOptions } from "openai";
 import dotenv from 'dotenv';
 dotenv.config();
 
-// const apiKey: string | undefined = process.env.OPENAI_3;
-const apiKey = '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'
+const apiKey: string | undefined = process.env.OPENAI_3;
 
 if (!apiKey) {
     throw new Error("OpenAI API key is not provided.");
 }
-//   new OpenAI({ apiKey: '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' })
-const openai = new OpenAI({ apiKey: apiKey } as ClientOptions);
+
+export const openai = new OpenAI({ apiKey: apiKey } as ClientOptions);
 
 const outputChannel = vscode.window.createOutputChannel('Controller Functions');
 
@@ -24,7 +23,7 @@ export async function extractControllers(document: vscode.TextDocument) {
             model: 'text-davinci-003',
             prompt: `Generate documentation for the following code:`,
             temperature: 0.7,
-            //   max_tokens: 150,
+            //   max_tokens: 150, //will have to edit based on tokens available as well as temprature
         };
 
         const response = await openai.completions.create(completionParams);
@@ -46,32 +45,4 @@ export async function extractControllers(document: vscode.TextDocument) {
 }
 
 
-export async function controllerExtractor() {
-    const outputChannel = vscode.window.createOutputChannel('Controller Functions');
 
-    outputChannel.clear();
-    outputChannel.appendLine('creating openai beta assistant...');
-
-    try {
-        const myAssistant = await openai.beta.assistants.create({
-            instructions:
-                "Your role is to extract function names from Express route files. When given an Express\
-        route file, your task is to identify and list the functions that the routes are executing.\
-        Please return the list of functions in a clear and formatted manner.",
-            name: 'Controller Functions',
-            tools: [{ type: 'code_interpreter' }],
-            model: 'text-davinci-002',
-        });
-
-        outputChannel.appendLine('Assistant created successfully.');
-
-        // Display any additional information you want from myAssistant
-
-        outputChannel.appendLine('Extraction completed.');
-        outputChannel.show(true);
-    } catch (error) {
-        console.error('Error creating assistant:', error);
-        outputChannel.appendLine('Error creating assistant.');
-        outputChannel.show(true);
-    }
-}

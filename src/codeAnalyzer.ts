@@ -5,14 +5,12 @@ function identifyDjangoRoutesAndViews(code: string): { routes: string[], views: 
     const routes: string[] = [];
     const views: string[] = [];
 
-    // Regular expression for Django urlpatterns
     const djangoUrlpatternRegex = /\burlpatterns\b\s*=\s*\[[\s\S]*?\]/ig;
     let urlpatternsMatch = djangoUrlpatternRegex.exec(code);
 
     if (urlpatternsMatch) {
         const urlpatternsCode = urlpatternsMatch[0];
 
-        // Regular expression for Django path() function within urlpatterns
         const pathRegex = /\bpath\s*\(\s*['"]([^'"]+)['"],\s*([^)]+)\)/ig;
         let match;
 
@@ -27,11 +25,8 @@ function identifyDjangoRoutesAndViews(code: string): { routes: string[], views: 
     return { routes, views };
 }
 
-// The findDjangoRoutes function iterates through all open documents,
-//  and for each document, it checks if there are Django routes.
-//  If found, it displays a message and logs the identified routes and views.
 
-export async function findDjangoRoutes() {
+async function findDjangoRoutes() {
     // Get all open documents in the editor
     const documents = vscode.workspace.textDocuments;
 
@@ -56,7 +51,7 @@ export async function findDjangoRoutes() {
 
 
 // Function to identify the codebase framework
-export function identifyCodebaseFramework(): string | undefined {
+function identifyCodebaseFramework(): string | undefined {
     const activeTextEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
 
     let framework: string | undefined;
@@ -72,7 +67,6 @@ export function identifyCodebaseFramework(): string | undefined {
         // Define regular expressions for each framework
         const expressRegex = /\bconst\s*app\s*=\s*express\s*\(\)\s*;\s*app\.use\(express\.json\(\)\)/;
         const djangoRegex: RegExp = /\bdjango\b.*(\burlpatterns\b.*\bdjango\.urls\b|\bpath\s*\(.*\))/i;
-        // ... (other framework regex)
 
         // Check for matches with regular expressions
         if (expressRegex.test(code)) {
@@ -98,5 +92,3 @@ export function identifyCodebaseFramework(): string | undefined {
     // If no active text editor
     return undefined;
 }
-
-

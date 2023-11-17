@@ -29,12 +29,12 @@ async function identifyExpressRoutes(): Promise<string[] | undefined> {
     const expressRouteFiles = await vscode.workspace.findFiles('**/routes.ts', '**/routes.js');
 
     if (expressRouteFiles.length === 0) {
-        vscode.window.showInformationMessage('No Express route files found, if your routes file exists make sure it is named `routes.ts` or `routes.js` in your Express app.');
+        vscode.window.showInformationMessage('No Express route files found, if youhave routes, make sure they are registerd in the `routes.ts` or `routes.js` file in your Express app.');
         return undefined;
     }
 
     const routeFilePaths = expressRouteFiles.map(file => file.fsPath);
-    vscode.window.showInformationMessage(`Express route files found: ${routeFilePaths.join(', ')}`);
+    vscode.window.showInformationMessage(`Express route files found: ${routeFilePaths.join(', ')}`); //Debuggin line
 
     return routeFilePaths;
 }

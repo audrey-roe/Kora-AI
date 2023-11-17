@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 
+//TODO: add more frameworks from here to the main code as time goes on.
 export function identifyCodebaseFramework(): string | undefined {
   const activeTextEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
 
@@ -21,7 +22,6 @@ export function identifyCodebaseFramework(): string | undefined {
     const angularRegex: RegExp = /\bangular\b/i;
     const reactRegex: RegExp = /\breact\b/i;
 
-    // Additional regular expressions for other frameworks
     const nodeRegex: RegExp = /\bnode\b/i;
     const koaRegex: RegExp = /\bkoa\b/i;
     const symfonyRegex: RegExp = /\bsymfony\b/i;

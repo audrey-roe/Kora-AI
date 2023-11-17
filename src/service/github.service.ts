@@ -38,9 +38,9 @@ export async function authenticateWithGitHub() {
 
             // Return the authentication session
             return {
-                id: 'your-session-id',
+                id: 'session-id',
                 accessToken: accessToken,
-                scopes: ['repo', 'workflow'], // Adjust with the actual scopes
+                scopes: ['repo', 'workflow'],
             };
         } catch (error) {
             console.error('GitHub login error:', error);
@@ -54,14 +54,13 @@ export async function authenticateWithGitHub() {
 
 async function pollForToken(deviceCodeData: any): Promise<any> {
     // Implement polling logic to obtain the access token using deviceCodeData
-    // You may need to use a timer and repeatedly call the /oauth/device/token endpoint
+    // We may need to use a timer and repeatedly call the /oauth/device/token endpoint
     // Example: https://docs.github.com/en/developers/apps/authorizing-oauth-apps#device-flow
     // Note: Make sure to handle errors and implement appropriate logic
     return new Promise((resolve, reject) => {
-        // Placeholder logic, replace with actual implementation
         setTimeout(() => {
-            resolve({ access_token: 'your-access-token' }); // Replace with the actual access token
-        }, 5000); // Adjust the polling interval as needed
+            resolve({ access_token: '' }); // fill with the actual access token
+        }, 5000); // polling interval
     });
 }
 
@@ -74,26 +73,20 @@ export async function createGitHubRepository(token: vscode.AuthenticationSession
     // Create a repository
     const repoCreationResponse = await (octokit.repos as any).createForAuthenticatedUser({ name: repoName, description: description, });
     vscode.window.showInformationMessage(`Repository created: ${repoCreationResponse.data.html_url}`);
-
-    // // Now you can use octokitInstance to perform GitHub API requests
-    // const repoCreationResponse = await octokitInstance.repos.createForAuthenticatedUser({
-    //     name: 'your-repo-name',
-    //     description: 'Your repository description',
-    // });
 }
 
-export async function commitToGitHubRepository(token: vscode.AuthenticationSession, repoName: string): Promise<void> {
+export async function commitToGitHubRepository(token: vscode.AuthenticationSession, repoName: string, owner: string): Promise<void> {
     const octokit = new Octokit({
         auth: token.accessToken,
     });
 
     // Commit to the repository
-    const commitMessage = 'Initial commit';
+    const commitMessage = 'chore: (First Commit) Boiler Creation';
     await (octokit.repos as any).createOrUpdateFile({
-        owner: 'your-username',
+        owner: owner,
         repo: repoName,
         path: 'test-file.txt',
         message: commitMessage,
-        content: Buffer.from('Hello, World!').toString('base64'),
+        content: Buffer.from('Hello, World!').toString('base64'), // have to read the documentation and use this feature for codebase implementation
     });
 }
