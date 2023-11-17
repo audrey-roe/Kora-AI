@@ -1,17 +1,40 @@
 import * as vscode from 'vscode';
 import { Octokit } from "@octokit/rest";
 import dotenv from 'dotenv';
+import {
+    createOAuthAppAuth,
+    createOAuthUserAuth,
+} from "@octokit/auth-oauth-app"
 
 dotenv.config();
+
+
 
 // OAuth App details
 const clientId = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 const redirectUri = process.env.GITHUB_REDIRECT_URI;
-const octokitInstance = new Octokit();
+const octokitInstance =
+    new Octokit({
+        auth: process.env.GITHUB_CLIENT_SECRET,
+        timeZone: 'Africa/Lagos',
+        baseUrl: 'https://api.github.com',
+        log: {
+            debug: () => { },
+            info: () => { },
+            warn: console.warn,
+            error: console.error
+        },
+        request: {
+            agent: undefined,
+            fetch: undefined,
+            timeout: 0
+        }
+    });
 
 
 export async function authenticateWithGitHub() {
+   
     const loginUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=repo,workflow`;
     await vscode.env.openExternal(vscode.Uri.parse(loginUrl));
 

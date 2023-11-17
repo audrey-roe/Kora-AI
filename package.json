@@ -20,10 +20,6 @@
       {
         "command": "kodekraftai.helloWorld",
         "title": "KodeKraftAI"
-      },
-      {
-        "command": "kodekraftai.polygot",
-        "title": "KodeKraftAI"
       }
     ]
   },
@@ -50,6 +46,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@octokit/auth-oauth-app": "^7.0.1",
     "@octokit/rest": "^20.0.2",
     "@types/config": "^3.3.3",
     "@types/estree": "^1.0.5",

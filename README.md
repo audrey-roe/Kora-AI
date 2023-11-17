@@ -1,71 +1,79 @@
-# kodekraftai README
+# Kodev README
 
-This is the README for your extension "kodekraftai". After writing up a brief description, we recommend including the following sections.
+This is the README for the "Kodev" extension.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+Kodev is a versatile extension designed to enhance your coding experience with the following key features:
 
-For example if there is an image subfolder under your extension project workspace:
+### Codebase Polyglot
 
-\!\[feature X\]\(images/feature-x.png\)
+- **Code Conversion:** Seamlessly convert code from one programming language to another. Whether you're transitioning between languages or collaborating with a team using different tech stacks, Kodev has you covered.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+### Documentation Generator
+
+- **Automated Documentation:** Generate comprehensive documentation for your codebase with ease. Kodev intelligently analyzes your code and creates documentation, saving you time and ensuring your projects stay well-documented.
+
+### Function Finder
+
+- **View Function Finder:** Easily locate and view Python functions in your project, especially useful for Django projects.
+
+- **Function Content Extraction:** Extract the entire content of a Python function, including indented code blocks.
+
+### Django Development Support
+
+- **Django View Detection:** Identify Django views in your project and navigate to their definitions effortlessly.
+
+### Intelligent Indentation Handling
+
+- **Accurate Indentation:** Kodev accurately detects the indentation level of functions, providing a comprehensive view and ensuring correct formatting.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+There are no specific requirements or dependencies for the Kodev extension. Simply install and start using it right away!
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+Kodev contributes the following settings:
 
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+- `kodev.helloWorld`: Enable/disable the Kodev extension.
+<!-- - `kodev.viewFinderDepth`: Set the depth of search when using the view function finder. -->
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+No known issues at the moment. Please report any encountered problems on the [GitHub repository](https://github.com/yourusername/kodev).
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
 ### 1.0.0
 
-Initial release of ...
+- Initial release of the Kodev extension, introducing core features for polyglot code conversion, documentation generation, and Python development support.
 
 ### 1.0.1
 
-Fixed issue #.
+- Fixed minor bugs related to function content extraction.
 
 ### 1.1.0
 
-Added features X, Y, and Z.
+- Added Django view detection and navigation.
 
 ---
 
-## Following extension guidelines
+## Following Extension Guidelines
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+Ensure that you've read through the [extensions guidelines](https://code.visualstudio.com/api/references/extension-guidelines) and follow best practices when using Kodev.
 
 ## Working with Markdown
 
 You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+- Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
+- Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
+- Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
 
-## For more information
+## For More Information
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+- [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
+- [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
 
-**Enjoy!**
+**Enjoy coding with Kodev!**
