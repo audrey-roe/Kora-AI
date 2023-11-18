@@ -46,7 +46,6 @@ export async function convertCode(code: string, targetLanguage: string): Promise
 
     return convertedCode;
   } catch (error) {
-    console.error('Error converting code:', error);
     throw error;
   }
 }

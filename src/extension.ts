@@ -6,6 +6,9 @@ import { processExpressProject } from './express/express-pocessor';
 import { authenticateWithGitHub } from './service/github.service';
 import { processDjangoProject } from './django/django-processor';
 import { convertCode } from './service/bot.service';
+import { getExpressFunctions} from './service/anthropic.service';
+// Import the web-streams-polyfill and define ReadableStream globally
+global.ReadableStream = require('web-streams-polyfill').ReadableStream;
 
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand('kodekraftai.generateDocumentation', async () => {
@@ -89,6 +92,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 async function handleCodeConversion(code: string, fileName: string, sourceLanguage: string): Promise<void> {
     const selectedLanguage = await vscode.window.showQuickPick(['JavaScript', 'Python', 'Java', 'TypeScript']);
+    getExpressFunctions();
 
     if (selectedLanguage) {
         try {
@@ -193,7 +197,7 @@ class PolyglotCodeActionProvider implements vscode.CodeActionProvider {
         // If no selection, offer the code action to convert the entire document
         const convertAction = new vscode.CodeAction('Kora AI: Convert Entire Code', vscode.CodeActionKind.QuickFix);
         convertAction.command = {
-            title: 'Kora AI: Convert Entire File',
+            title: 'Kora AI: Convert File',
             command: 'kodekraftai.showLanguageMenu',
         };
         return [convertAction];

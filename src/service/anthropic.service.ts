@@ -1,7 +1,9 @@
 //test.ts
+import * as vscode from 'vscode';
 import config from '../config/defaults';
 
-async function useAnthropicFunctions() {
+//Function that uses anthropic to extract express controllers
+export async function getExpressFunctions() {
     try {
         const AnthropicFunctionsModule = await import("langchain/experimental/chat_models/anthropic_functions");
         const { HumanMessage } = await import("langchain/schema");
@@ -39,12 +41,10 @@ async function useAnthropicFunctions() {
             }),
         ]);
 
-        console.log(response);
+        vscode.window.showInformationMessage(`Response: ${response}`);
 
     } catch (error) {
-        console.error('Error importing AnthropicFunctions:', error);
+        vscode.window.showErrorMessage(`Error importing AnthropicFunctions: ${error}`);
     }
 }
 
-// // Call the function to use AnthropicFunctions
-// useAnthropicFunctions();
