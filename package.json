@@ -12,6 +12,7 @@
   "activationEvents": [
     "onCommand:kodekraftai.generateDocumentation",
     "onCommand:kodekraftai.convertCodebase",
+    "onCommand:kodekraftai.showLanguageMenu",
     "onLanguage:python",
     "onLanguage:javascript",
     "onLanguage:typescript"
@@ -26,6 +27,10 @@
       {
         "command": "kodekraftai.convertCodebase",
         "title": "Kora AI: Convert Codebase"
+      },
+      {
+        "command": "kodekraftai.showLanguageMenu",
+        "title": "Kora AI: Convert Selected Code"
       }
     ]
   },
