@@ -11,16 +11,22 @@
   ],
   "activationEvents": [
     "onCommand:kodekraftai.generateDocumentation",
+    "onCommand:kodekraftai.polygot",
     "onLanguage:python",
     "onLanguage:javascript",
-    "onLanguage:typescript"
+    "onLanguage:typescript",
+    "onLanguage:java"
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [
+    "commands":[
       {
         "command": "kodekraftai.generateDocumentation",
         "title": "KodeKraftAI"
+      },
+      {
+        "command": "kodekraftai.polygot",
+        "title": "KodeKraftAI: Polygot"
       }
     ]
   },
