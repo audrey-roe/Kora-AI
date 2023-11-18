@@ -22,7 +22,7 @@ export async function extractControllers(document: vscode.TextDocument) {
     try {
         const completionParams = {
             model: 'text-davinci-003',
-            prompt: `Generate documentation for the following code:`,
+            prompt: prompt,
             temperature: 0.7,
             //   max_tokens: 150, //will have to edit based on tokens available as well as temprature
         };

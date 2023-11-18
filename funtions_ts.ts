@@ -1,20 +1,24 @@
-import * as openai from 'openai'; // Import the openai library
+// import * as openai from 'openai'; // Import the openai library
 import * as fs from 'fs';
+import OpenAI, { ClientOptions } from "openai";
+import dotenv from 'dotenv';
 
 // Load environment variables
-require('dotenv').config();
+dotenv.config();
 
-openai.apiKey = process.env.OPENAI_KEY || ''; // Set OpenAI API key
+// openai.apiKey = process.env.OPENAI_KEY || ''; // Set OpenAI API key
+const apiKey: string | undefined = process.env.OPENAI_KEY || '';
+export const openai = new OpenAI({ apiKey: apiKey } as ClientOptions);
 
 // Completion function
-async function getCompletion(messages: any, model = "gpt-3.5-turbo", temperature = 0, maxTokens = 300) {
-    const response = await openai.ChatCompletion.create({
-        model,
-        messages,
+async function getCompletion(messages: any, temperature = 0, maxTokens = 300) {
+    const response = await openai.completions.create({
+        model: "gpt-3.5-turbo",
+        prompt: messages,
         temperature,
-        maxTokens,
+        max_tokens: maxTokens,
     });
-    return response.choices[0].message.content;
+    return response.choices[0].text;
 }
 
 // Function to extract controllers from an Express route file
@@ -32,7 +36,7 @@ function extractControllersFromExpressRoute(file_path: string) {
                 controllers.push(controllerName);
             });
         }
-    } catch (error) {
+    } catch (error:any) {
         if (error.code === 'ENOENT') {
             console.log('File not found');
         } else {
@@ -68,7 +72,7 @@ async function viewClean(file_path: string) {
 
         const response = await getCompletion(message);
         console.log(response);
-    } catch (error) {
+    } catch (error:any) {
         if (error.code === 'ENOENT') {
             console.log('File not found');
         } else {
@@ -103,7 +107,7 @@ async function docGen(file_path: string) {
 
         const response = await getCompletion(message);
         console.log(response);
-    } catch (error) {
+    } catch (error:any) {
         if (error.code === 'ENOENT') {
             console.log('File not found');
         } else {
