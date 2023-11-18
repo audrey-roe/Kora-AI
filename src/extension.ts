@@ -73,11 +73,11 @@ export function activate(context: vscode.ExtensionContext) {
             if (!selection.isEmpty) {
                 
                 const selectedCode = editor.document.getText(selection);
-                vscode.window.showInformationMessage(`Selected code: ${selectedCode}`);
 
                 handleCodeConversion(selectedCode, editor.document.fileName, editor.document.languageId);
             } else {
                 const entireCode = editor.document.getText();
+
                 handleCodeConversion(entireCode, editor.document.fileName, editor.document.languageId);
             }
         }
@@ -131,7 +131,6 @@ async function getConvertedCode(code: string, targetLanguage: string, fileName: 
 
     return `// check file.${targetFileExtension} for the converted code\n\n// Converted from ${sourceLanguage} to ${targetLanguage}\n\n${code}`;
 }
-
 
 function createNewFile(originalFileName: string, targetLanguage: string, convertedCode: string): void {
     // Get the directory and base name of the original file
@@ -194,7 +193,7 @@ class PolyglotCodeActionProvider implements vscode.CodeActionProvider {
         // If no selection, offer the code action to convert the entire document
         const convertAction = new vscode.CodeAction('Kora AI: Convert Entire Code', vscode.CodeActionKind.QuickFix);
         convertAction.command = {
-            title: 'Kora AI: Convert Entire Code',
+            title: 'Kora AI: Convert Entire File',
             command: 'kodekraftai.showLanguageMenu',
         };
         return [convertAction];
