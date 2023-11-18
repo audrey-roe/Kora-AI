@@ -9,7 +9,7 @@ const apiKey: string | undefined = config.OPENAI_3;
 if (!apiKey) {
   throw new Error("OpenAI API key is not provided.");
 }
-const openai = new OpenAI({ key: apiKey } as ClientOptions);
+const openai = new OpenAI({ apiKey: apiKey } as ClientOptions);
 
 // function to generate documentation using GPT, //TODO: change implementation instead of chat completion use, openai assistant
 export async function generateDocumentation(code: string): Promise<string> {
@@ -36,7 +36,7 @@ export async function convertCode(code: string, targetLanguage: string): Promise
   try {
 
     const response = await openai.completions.create({
-      model: 'text-davinci-002', // Use an appropriate engine
+      model: 'text-davinci-002', //TODO: Use an appropriate engine
       prompt: `Convert the following code to ${targetLanguage}:\n\n${code}`,
     //   max_tokens: 150, 
     });

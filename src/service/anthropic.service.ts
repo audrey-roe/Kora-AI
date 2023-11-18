@@ -1,9 +1,9 @@
+//test.ts
 import config from '../config/defaults';
 
 async function useAnthropicFunctions() {
     try {
         const AnthropicFunctionsModule = await import("langchain/experimental/chat_models/anthropic_functions");
-        // Correct the import for HumanMessage
         const { HumanMessage } = await import("langchain/schema");
 
         const model = new AnthropicFunctionsModule.AnthropicFunctions({
@@ -27,13 +27,12 @@ async function useAnthropicFunctions() {
                     },
                 },
             ],
-            // You can set the `function_call` arg to force the model to use a function
+            //  can probably set the `function_call` arg to force the model to use a function
             function_call: {
                 name: "get_current_weather",
             },
         });
 
-        // Make sure to await the model.invoke call
         const response = await model.invoke([
             new HumanMessage({
                 content: "What's the weather in Boston?",
@@ -47,5 +46,5 @@ async function useAnthropicFunctions() {
     }
 }
 
-// Call the function to use AnthropicFunctions
-useAnthropicFunctions();
+// // Call the function to use AnthropicFunctions
+// useAnthropicFunctions();

@@ -5,6 +5,7 @@ import { identifyCodebaseFramework } from './service/identity.service';
 import { processExpressProject } from './express/express-pocessor';
 import { authenticateWithGitHub } from './service/github.service';
 import { processDjangoProject } from './django/django-processor';
+import { convertCode } from './service/bot.service';
 
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand('kodekraftai.generateDocumentation', async () => {
@@ -64,52 +65,73 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Register the command to show the language menu
     context.subscriptions.push(vscode.commands.registerCommand('kodekraftai.showLanguageMenu', () => {
-        // Get the entire document's text
-        const document = vscode.window.activeTextEditor?.document;
-        if (document) {
-            const entireCode = document.getText();
+        // Get the active text editor
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+            // Check if there is a selection
+            const selection = editor.selection;
+            if (!selection.isEmpty) {
+                
+                const selectedCode = editor.document.getText(selection);
+                vscode.window.showInformationMessage(`Selected code: ${selectedCode}`);
 
-            // Show a quick pick menu to choose the target language
-            vscode.window.showQuickPick(['JavaScript', 'Python', 'Java', 'TypeScript'])
-                .then((selectedLanguage) => {
-                    if (selectedLanguage) {
-                        try {
-                            // Replace the code with a placeholder code in the selected language
-                            const convertedCode = getConvertedCode(entireCode, selectedLanguage, document.fileName, document.languageId);
-                            vscode.window.activeTextEditor?.edit((editBuilder) => {
-                                editBuilder.replace(
-                                    new vscode.Range(
-                                        new vscode.Position(0, 0),
-                                        document.lineAt(document.lineCount - 1).rangeIncludingLineBreak.end
-                                    ),
-                                    convertedCode
-                                );
-                            });
-
-                            // Create a new file with the converted code
-                            createNewFile(document.fileName, selectedLanguage, convertedCode);
-                        } catch (error) {
-                            // Handle errors related to code conversion
-                            vscode.window.showErrorMessage(`Error converting code: ${error instanceof Error ? error.message : 'Unknown error'}`);
-                        }
-                    }
-                });
+                handleCodeConversion(selectedCode, editor.document.fileName, editor.document.languageId);
+            } else {
+                const entireCode = editor.document.getText();
+                handleCodeConversion(entireCode, editor.document.fileName, editor.document.languageId);
+            }
         }
     }));
 
     context.subscriptions.push(polygotDisposable);
     context.subscriptions.push(checkLoginCommand);
-
 }
-function getConvertedCode(code: string, targetLanguage: string, fileName: string, sourceLanguage: string): string {
-    // Extract the source file extension
+
+async function handleCodeConversion(code: string, fileName: string, sourceLanguage: string): Promise<void> {
+    const selectedLanguage = await vscode.window.showQuickPick(['JavaScript', 'Python', 'Java', 'TypeScript']);
+
+    if (selectedLanguage) {
+        try {
+
+            const convertedCode = await getConvertedCode(code, selectedLanguage, fileName, sourceLanguage);
+            const activeEditor = vscode.window.activeTextEditor;
+
+            if (activeEditor) {
+                await activeEditor.edit((editBuilder) => {
+                    editBuilder.replace(
+                        new vscode.Range(
+                            new vscode.Position(0, 0),
+                            activeEditor.document.lineAt(activeEditor.document.lineCount - 1).rangeIncludingLineBreak.end
+                        ),
+                        convertedCode
+                    );
+                });
+
+                createNewFile(fileName, selectedLanguage, convertedCode);
+            } else {
+                vscode.window.showErrorMessage('No active text editor found.');
+            }
+        } catch (error) {
+            // Handle errors related to code conversion
+            vscode.window.showErrorMessage(`Error converting code: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+}
+
+async function getConvertedCode(code: string, targetLanguage: string, fileName: string, sourceLanguage: string): Promise<string> {
     const targetFileExtension = getTargetFileExtension(targetLanguage);
     const sourceFileExtension = path.extname(fileName).slice(1);
 
-    // Add logic to convert the code to the specified language
-    // For simplicity, I'll just return a placeholder string
+    try {
+        code = await convertCode(code, targetLanguage);
+    } catch (error) {
+        vscode.window.showErrorMessage(`Error converting code: ${error}`);
+        throw error;
+    }
+
     return `// check file.${targetFileExtension} for the converted code\n\n// Converted from ${sourceLanguage} to ${targetLanguage}\n\n${code}`;
 }
+
 
 function createNewFile(originalFileName: string, targetLanguage: string, convertedCode: string): void {
     // Get the directory and base name of the original file
@@ -134,6 +156,7 @@ function createNewFile(originalFileName: string, targetLanguage: string, convert
         vscode.window.showErrorMessage(`Error creating new file: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 }
+
 /**
  * Represents the code action provider for the Polyglot extension.
  */
@@ -151,12 +174,27 @@ class PolyglotCodeActionProvider implements vscode.CodeActionProvider {
         range: vscode.Range | vscode.Selection,
         context: vscode.CodeActionContext
     ): vscode.ProviderResult<(vscode.Command | vscode.CodeAction)[]> {
-        console.log('Code action provider invoked.');
 
-        // Offer a code action to convert the code to a specific language
-        const convertAction = new vscode.CodeAction('Kora AI: Convert Selected Code', vscode.CodeActionKind.QuickFix);
+        // Check if there is a selection in the editor
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+            const selection = editor.selection;
+            if (!selection.isEmpty) {
+                
+                // If text is selected, offer the code action to convert the selected code
+                const convertAction = new vscode.CodeAction('Kora AI: Convert Selected Code', vscode.CodeActionKind.QuickFix);
+                convertAction.command = {
+                    title: 'Kora AI: Convert Selected Code',
+                    command: 'kodekraftai.showLanguageMenu',
+                };
+                return [convertAction];
+            }
+        }
+
+        // If no selection, offer the code action to convert the entire document
+        const convertAction = new vscode.CodeAction('Kora AI: Convert Entire Code', vscode.CodeActionKind.QuickFix);
         convertAction.command = {
-            title: 'Kora AI: Convert Selected Code',
+            title: 'Kora AI: Convert Entire Code',
             command: 'kodekraftai.showLanguageMenu',
         };
         return [convertAction];
@@ -184,5 +222,3 @@ function getTargetFileExtension(targetLanguage: string): string {
 
 
 export function deactivate() { }
-
-
