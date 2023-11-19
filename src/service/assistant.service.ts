@@ -19,6 +19,7 @@ interface DjangoView extends CommonView {
         content: string;
     } | string;
 }
+
 // function for generating documentation for Django views
 export function generateDocumentation(views: CommonView[]) {
     // Iterating over the list of views and generate documentation

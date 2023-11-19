@@ -43,10 +43,10 @@ export function activate(context: vscode.ExtensionContext) {
 
         const session = await vscode.authentication.getSession('github', ['repo', 'workflow', 'read:user']);
         if (session) {
-            const isLoggedIn = true
+            const isLoggedIn = true;
 
         } else {
-            const isLoggedIn = false
+            const isLoggedIn = false;
         }
 
         if (!isLoggedIn) {

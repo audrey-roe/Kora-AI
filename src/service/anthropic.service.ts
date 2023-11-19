@@ -1,4 +1,3 @@
-//test.ts
 import * as vscode from 'vscode';
 import config from '../config/defaults';
 
