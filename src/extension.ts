@@ -7,7 +7,9 @@ import { authenticateWithGitHub } from './service/github.service';
 import { processDjangoProject } from './django/django-processor';
 import { convertCode } from './service/bot.service';
 import { getExpressFunctions} from './service/anthropic.service';
-// Import the web-streams-polyfill and define ReadableStream globally
+
+// Import the web-streams-polyfill package and define ReadableStream globally: fixes langchain for node error
+
 global.ReadableStream = require('web-streams-polyfill').ReadableStream;
 
 export function activate(context: vscode.ExtensionContext) {
@@ -29,16 +31,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(disposable);
 
-    const githubDisposable = vscode.commands.registerCommand('kodekraftai.loginGithub', () => {
-        authenticateWithGitHub();
-    });
 
-    let polygotDisposable = vscode.commands.registerCommand('kodekraftai.polygot', () => {
-        vscode.window.showInformationMessage('New command is executed!');
-        // Add your logic for the new command here
-    });
-
-    const checkLoginCommand = vscode.commands.registerCommand('kodekraftai.convertCodebase', async () => {
+    context.subscriptions.push(vscode.commands.registerCommand('kodekraftai.convertCodebase', async () => {
         let isLoggedIn;
 
         const session = await vscode.authentication.getSession('github', ['repo', 'workflow', 'read:user']);
@@ -57,12 +51,11 @@ export function activate(context: vscode.ExtensionContext) {
                     }
                 });
         }
-    });
-
+    }));
 
     // Register the code action provider for specific languages
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(
-        ['plaintext', 'python', 'javascript', 'java', 'typescript'],
+        ['plaintext', 'python', 'javascript', 'typescript'],
         new PolyglotCodeActionProvider()
     ));
 
@@ -86,12 +79,10 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }));
 
-    context.subscriptions.push(polygotDisposable);
-    context.subscriptions.push(checkLoginCommand);
 }
 
 async function handleCodeConversion(code: string, fileName: string, sourceLanguage: string): Promise<void> {
-    const selectedLanguage = await vscode.window.showQuickPick(['JavaScript', 'Python', 'Java', 'TypeScript']);
+    const selectedLanguage = await vscode.window.showQuickPick(['JavaScript', 'TypeScript', 'Python']);
     getExpressFunctions();
 
     if (selectedLanguage) {
