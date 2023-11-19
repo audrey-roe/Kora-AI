@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as path from 'path'
+import * as path from 'path';
 import { filesRecursive } from './file-utils';
 
 export async function locateViewFunction(viewName: string): Promise<{ moduleName: string, functionName: string, content: string } | undefined> {
@@ -71,6 +71,7 @@ export async function locateViewFunction(viewName: string): Promise<{ moduleName
     return undefined;
 }
 
+// finding end of python function
 export function findEndOfFunction(content: string, startIndex: number): number {
     let openBraces = 0;
     let i = startIndex;
