@@ -1,7 +1,10 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { extractControllers } from '../service/ai.service';
+import * as fs from 'fs';
+
+import { ControllerDictionary, extractControllers } from '../service/ai.service';
 import { filesRecursive } from '../utils/file-utils';
+import { generateDocumentation } from '../service/bot.service';
 
 export async function processExpressProject() {
     try {
@@ -16,8 +19,8 @@ export async function processExpressProject() {
                     // Extract keys from the dictionary
                     if (apiResponse) {
                         const controllers: string[] = Object.keys(apiResponse);
-                        vscode.window.showInformationMessage(`controllers: ${controllers }`);
-                        // await checkControllers(controllers);
+                        // vscode.window.showInformationMessage(`controllers: ${controllers}`);
+                        await checkControllers(controllers, apiResponse);
                         
                     } else {
                         console.log('API response is undefined.');
@@ -85,7 +88,7 @@ async function locateExpressController(controllerName: string): Promise<{ module
                 if (endOfBlock !== -1) {
                     const viewContent = content.substring(startIndex, endOfBlock + 1);
                     vscode.window.showInformationMessage(`Module name: ${moduleName}, Function name: ${functionName}, Content: ${viewContent}`);
-                    return; //{ moduleName, functionName, content: viewContent };
+                    return { moduleName, functionName, content: viewContent };
                 }
             }
         }
@@ -122,40 +125,66 @@ function findEndOfBlock(content: string, startIndex: number): number {
     return -1; // Not found
 }
 
-// const controller =  ['loginUserHandler', 'createUserHandler', 'deleteUserHandler', 'revokeSession', 'getFileHandler', 'streamFileController', 'uploadFileHandler', 'handleCreateFolder', 'markAndDeleteUnsafeFileController', 'getFileHistoryController', 'reviewFile', 'createOrUpdateSession', 'isAdmin']
-async function checkControllers(controllers: string[] | undefined) {
+let documentationFileCreated = false;
+async function checkControllers(controllers: string[] | undefined, apiResponse: ControllerDictionary) {
     if (!controllers) {
         vscode.window.showErrorMessage('Error identifying express controllers');
-
         return;
     }
 
     for (const controller of controllers) {
         try {
-            vscode.window.showInformationMessage(`controller: ${controller}`);
-            const result = await locateExpressController(controller);
-            if (result) {
-                vscode.window.showInformationMessage(`Controller ${controller} found`);
+            // vscode.window.showInformationMessage(`controller: ${controller}`);
+
+            // Check if the controller exists in apiResponse
+            if (apiResponse.hasOwnProperty(controller)) {
+                const [endpointURL, method, functionName] = apiResponse[controller];
+
+                const result = await locateExpressController(controller);
+
+                if (result) {
+                    const documentation = await generateDocumentation(functionName, method, endpointURL, result.content);
+
+                    vscode.window.showInformationMessage(`${functionName} ${method} ${endpointURL} ${result.content}`);
+                    appendDocumentationToMarkdown(documentation);
+
+                }
+            } else {
+                vscode.window.showWarningMessage(`Controller ${controller} not found in API response.`);
             }
         } catch (error) {
-            // console.error(`Error checking controller ${controller}: `, error);
-            vscode.window.showInformationMessage(`Error checking controller ${controller}: ${error} `);
+            vscode.window.showErrorMessage(`Error checking controller ${controller}: ${error} `);
         }
     }
 }
 
-async function extractList(inputText: string[]): Promise<string[]> {
-    const inputString = inputText.join(''); // Join the array of strings into a single string
-    const startIndex = inputString.indexOf('[');
-    const endIndex = inputString.lastIndexOf(']');
-  
-    if (startIndex === -1 || endIndex === -1) {
-      throw new Error('Invalid input format. Could not find [ or ].');
+
+function appendDocumentationToMarkdown(documentation: string) {
+    try {
+        // Get the root path of the workspace
+        const workspaceRoot = vscode.workspace.rootPath;
+
+        if (!workspaceRoot) {
+            vscode.window.showErrorMessage('No workspace is open.');
+            return;
+        }
+
+        // Generate the filename
+        const fileName = `${workspaceRoot}/documentation.md`;
+
+        // If the documentation file hasn't been created in this execution, create it
+        if (!documentationFileCreated && !fs.existsSync(fileName)) {
+            fs.writeFileSync(fileName, ''); // Create an empty file
+            documentationFileCreated = true;
+        }
+
+        // Append the generated documentation to the Markdown file
+        fs.appendFileSync(fileName, documentation + '\n\n');
+    } catch (error) {
+        vscode.window.showErrorMessage(`Error appending documentation to file: ${error}`);
+        throw error;
     }
-  
-    const listSubstring = inputString.substring(startIndex + 1, endIndex);
-    const extractedList = listSubstring.split(',').map((item: string) => item.trim());
-    const finalList = extractedList.filter((item: string) => item !== '');
-  
-    return finalList;
-  }
+}
+
+
+

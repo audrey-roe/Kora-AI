@@ -16,11 +16,11 @@ export const openai = new OpenAI({ apiKey: apiKey } as ClientOptions);
 
 const outputChannel = vscode.window.createOutputChannel('Controller Functions');
 
-interface ControllerDictionary {
-    [controllerName: string]: string;
+export interface ControllerDictionary {
+    [controllerName: string]: [string, string, string];
 }
 
-//TODO: There are too many nested conditionals, treat when cleaning u
+//TODO: There are too many nested conditionals, treat when cleaning up
 export async function extractControllers(document: any): Promise<ControllerDictionary | undefined> {
     const routeContent = document.getText();
 

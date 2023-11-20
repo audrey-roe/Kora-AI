@@ -16,7 +16,7 @@ When generating the documentation, consider the nuances of POST requests, making
 Conclude your documentation generation with a clear statement indicating the completion of documentation for the given endpoint. -->
 
 
-Your task involves generating documentation for each endpoint of an API, focusing on a one-endpoint-at-a-time approach. The documentation for each endpoint should be comprehensive, providing key details in a structured format.
+Your task involves generating documentation for each endpoint of an API, focusing on a one-endpoint-at-a-time approach. The documentation for each endpoint should be comprehensive, providing key details in a structured format. 
 
 For each endpoint:
 
@@ -74,5 +74,5 @@ Here is a template to guide your documentation generation:
 }
 ```
 ```
-
+One endpoint will be generated at a time, the function name, method, Endpoint URL, the function code will be passed to you to generate the documentation for each endpoint.
 Ensure that the documentation is clear, consistent, and adheres to best practices. Maintain a logical order for presenting information, making it easy for developers to understand and implement. When generating the documentation, consider the nuances of POST requests, making explicit any required fields in the request body. Additionally, emphasize the importance of the response structure by including a representative example. Conclude each documentation entry with a clear indication that the documentation for that specific endpoint is complete.
