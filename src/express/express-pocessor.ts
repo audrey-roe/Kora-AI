@@ -14,10 +14,11 @@ export async function processExpressProject() {
                     const document = await vscode.workspace.openTextDocument(route);
                     const apiResponse = await extractControllers(document);
 
+                    // Extract keys from the dictionary
                     if (apiResponse) {
-                        const controllers = await extractList(apiResponse);
-                        vscode.window.showInformationMessage(`${controllers}`);
-                        await checkControllers(controllers);
+                        const controllers: string[] = Object.keys(apiResponse);
+                        vscode.window.showInformationMessage(`controllers: ${controllers }`);
+                        // await checkControllers(controllers);
                         
                     } else {
                         console.log('API response is undefined.');
@@ -85,7 +86,7 @@ async function locateExpressController(controllerName: string): Promise<{ module
                 if (endOfBlock !== -1) {
                     const viewContent = content.substring(startIndex, endOfBlock + 1);
                     vscode.window.showInformationMessage(`Module name: ${moduleName}, Function name: ${functionName}, Content: ${viewContent}`);
-                    return //{ moduleName, functionName, content: viewContent };
+                    return; //{ moduleName, functionName, content: viewContent };
                 }
             }
         }

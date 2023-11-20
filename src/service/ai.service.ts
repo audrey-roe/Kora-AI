@@ -16,45 +16,73 @@ export const openai = new OpenAI({ apiKey: apiKey } as ClientOptions);
 
 const outputChannel = vscode.window.createOutputChannel('Controller Functions');
 
-export async function extractControllers(document: any): Promise<string[] | undefined> {
+interface ControllerDictionary {
+    [controllerName: string]: string;
+}
 
+export async function extractControllers(document: any): Promise<ControllerDictionary | undefined> {
     const routeContent = document.getText();
 
-    const prompt = `Your task is to meticulously extract function names from route or URL files. 
-Approach the problem methodically, thinking step by step to ensure accuracy in your output.
+    const prompt = `Your task is to meticulously extract function names and their corresponding URLs from route or URL files. 
+    Approach the problem methodically, thinking step by step to ensure accuracy in your output.
 
-Initiate the process by scrutinizing the route file and systematically identify the all the functions that the routes execute. 
-Your ultimate goal is to compile a complete and well-organized list of these functions. To increase accuracy, scan the entire document 
-and collect all possible functions. Examine how each function is imported, reference is typically at the top of the document and where 
-they are being imported from. Also, observe other files being imported alongside it to determine if they should be included in the output. 
-also analyse other import lines and see whether they should be included. Be sure to avoid including middlewares in the output.
+    Initiate the process by scrutinizing the route file and systematically identify all the functions that the routes execute. 
+    Your ultimate goal is to compile a complete and well-organized dictionary of these functions, where the key is the controller name and 
+    the value is the corresponding URL. To increase accuracy, scan the entire document and collect all possible functions. 
+    Examine how each function is imported; the reference is typically at the top of the document and where they are being imported from. 
+    Also, observe other files being imported alongside it to determine if they should be included in the output. 
+    Analyze other import lines and see whether they should be included. Be sure to avoid including middlewares in the output.
 
-As you near completion, perform a comprehensive double-check to confirm the presence of all function names in the file. 
-Only conclude your work when you are certain that the list is complete. 
-Your response should be a simple list of functions enclosed in square brackets, each item encased in single inverted comma, separated by comma 
-and a single space and nothing else:\n\n${routeContent}`;
-
+    As you near completion, perform a comprehensive double-check to confirm the presence of all function names in the file. 
+    Only conclude your work when you are certain that the dictionary is complete. 
+    Your response should be a dictionary where the key is the controller name (encased in single inverted commas) and 
+    the value is the corresponding URL, enclosed in curly braces and separated by commas and a single space:\n\n${routeContent}`;
 
     try {
         const completionParams = {
             model: 'text-davinci-003',
             prompt: prompt,
             temperature: 0.7,
-            max_tokens: 300, //will have to edit based on tokens available as well as temprature
+            max_tokens: 300,
         };
 
         const response = await openai.completions.create(completionParams);
 
+        const controllersObject: ControllerDictionary = {};
 
-        const controllersList = response.choices[0]?.text.trim().split('\n');
-        // vscode.window.showInformationMessage(`open ai response ${controllersList}`); //Debugging line
+        if (response.choices && response.choices[0]?.text) {
+            const responseText = response.choices[0].text;
 
-        if (controllersList) {
-            vscode.window.showInformationMessage(`Controller Functions: ${controllersList}`);
+            try {
+                // Use a regular expression to find the first occurrence of '{' and '}'
+                const match = responseText.match(/{[^{}]*}/);
+
+                if (match) {
+                    // Extract the matched JSON string and parse it
+                    const jsonString = match[0].replace(/'/g, '"');
+                    vscode.window.showInformationMessage(`Parsed JSON String: ${jsonString}`);
+
+                    try {
+                        const parsedObject = JSON.parse(jsonString);
+                        return parsedObject;
+                    } catch (jsonError) {
+                        console.error('Error parsing JSON:', jsonError);
+                        vscode.window.showErrorMessage(`Error parsing JSON. Check the OpenAI response for unexpected format. ${jsonError}`);
+                    }
+                } else {
+                    console.error('Failed to extract controller functions. No JSON object found.');
+                    vscode.window.showErrorMessage('Failed to extract controller functions. No JSON object found.');
+                }
+
+            } catch (jsonError) {
+                console.error('Error parsing JSON:', jsonError);
+                vscode.window.showErrorMessage(`Error parsing JSON. Check the OpenAI response for unexpected format. ${jsonError}`);
+            }
         } else {
-            vscode.window.showErrorMessage('Failed to extract controller functions.');
+            console.error('Failed to extract controller functions. No response or text found.');
+            vscode.window.showErrorMessage('Failed to extract controller functions. No response or text found.');
         }
-        return (controllersList);
+
     } catch (error) {
         console.error('OpenAI API Error:', error);
 
@@ -63,3 +91,4 @@ and a single space and nothing else:\n\n${routeContent}`;
         vscode.window.showErrorMessage(`Error communicating with OpenAI API. ${error}`);
     }
 }
+
