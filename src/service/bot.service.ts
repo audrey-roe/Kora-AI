@@ -31,21 +31,53 @@ export async function generateDocumentation(code: string): Promise<string> {
   }
 }
 
+ // function to convert code using GPT
+// export async function convertCode(code: string, targetLanguage: string): Promise<string> {
+// try {
+
+//     const response = await openai.completions.create({
+//       model: 'gpt-3.5-turbo', //TODO: Use an appropriate engine
+//       prompt: `Convert the following code to ${targetLanguage}:\n\n${code}`,
+//     //   max_tokens: 150,
+//     });
+
+//     // Extract the converted code from the response
+//     const convertedCode = response.choices[0].text.trim();
+
+//     return convertedCode;
+//   } catch (error) {
+//     throw error;
+//   }
+// }
+
+
 // function to convert code using GPT
 export async function convertCode(code: string, targetLanguage: string): Promise<string> {
   try {
-
-    const response = await openai.completions.create({
-      model: 'text-davinci-002', //TODO: Use an appropriate engine
-      prompt: `Convert the following code to ${targetLanguage}:\n\n${code}`,
-    //   max_tokens: 150, 
+    const response = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant.' },
+        { role: 'user', content: `Convert the following code to ${targetLanguage}:\n\n${code}` },
+      ],
     });
 
-    // Extract the converted code from the response
-    const convertedCode = response.choices[0].text.trim();
+    // Check if choices array exists and is not empty
+    if (response.choices && response.choices.length > 0) {
+      // Use the correct property based on the type definition
+      const content = response.choices[0].message?.content;
 
-    return convertedCode;
+      if (content !== undefined && content !== null) {
+        const convertedCode = content.trim();
+        return convertedCode;
+      } else {
+        throw new Error('Unexpected response structure: message content is null or undefined.');
+      }
+    } else {
+      throw new Error('Unexpected response structure: choices array is empty or undefined.');
+    }
   } catch (error) {
     throw error;
   }
 }
+
