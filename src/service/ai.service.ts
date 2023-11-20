@@ -48,7 +48,7 @@ export async function extractControllers(document: any): Promise<ControllerDicti
         'exampleController2': ['/route2', 'POST', 'exampleController2'],
         // ... other controllers ...
     };
-    Avoid adding 'Output' or 'Answer' or anything thing else before the , only the list is required as output:
+    Avoid adding 'Output' or 'Answer' or anything thing else before the dicttionary, only the dictionary is required as output:
     \n\n${routeContent}`;
 
 
@@ -69,7 +69,7 @@ export async function extractControllers(document: any): Promise<ControllerDicti
 
             try {
                 // Using a regular expression to find the first occurrence of '{' and '}'
-                const match = responseText.match(/{[^{}]*}/);
+                const match = responseText.match(/{[\s\S]*?}/);
 
                 if (match) {
                     // Extract the matched JSON string and parse it

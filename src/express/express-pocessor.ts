@@ -143,10 +143,10 @@ async function checkControllers(controllers: string[] | undefined, apiResponse: 
                 const result = await locateExpressController(controller);
 
                 if (result) {
-                    const documentation = await generateDocumentation(functionName, method, endpointURL, result.content);
+                    // const documentation = await generateDocumentation(functionName, method, endpointURL, result.content);
 
                     vscode.window.showInformationMessage(`${functionName} ${method} ${endpointURL} ${result.content}`);
-                    appendDocumentationToMarkdown(documentation);
+                    // appendDocumentationToMarkdown(documentation);
 
                 }
             } else {
