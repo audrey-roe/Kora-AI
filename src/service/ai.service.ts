@@ -20,6 +20,7 @@ interface ControllerDictionary {
     [controllerName: string]: string;
 }
 
+//TODO: There are too many nested conditionals, treat when cleaning up the code.
 export async function extractControllers(document: any): Promise<ControllerDictionary | undefined> {
     const routeContent = document.getText();
 
@@ -54,11 +55,10 @@ export async function extractControllers(document: any): Promise<ControllerDicti
             const responseText = response.choices[0].text;
 
             try {
-                // Use a regular expression to find the first occurrence of '{' and '}'
+                // Using a regular expression to find the first occurrence of '{' and '}'
                 const match = responseText.match(/{[^{}]*}/);
 
                 if (match) {
-                    // Extract the matched JSON string and parse it
                     const jsonString = match[0].replace(/'/g, '"');
                     vscode.window.showInformationMessage(`Parsed JSON String: ${jsonString}`);
 
@@ -91,4 +91,3 @@ export async function extractControllers(document: any): Promise<ControllerDicti
         vscode.window.showErrorMessage(`Error communicating with OpenAI API. ${error}`);
     }
 }
-

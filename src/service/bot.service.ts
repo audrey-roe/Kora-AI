@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import OpenAI, { ClientOptions } from "openai";
 import config from '../config/defaults';
 
@@ -15,7 +16,7 @@ const openai = new OpenAI({ apiKey: apiKey } as ClientOptions);
 export async function generateDocumentation(code: string): Promise<string> {
     try {
     const completionParams = {
-      model: 'text-davinci-002',
+      model: 'gpt-3.5-turbo',
       prompt: `Generate documentation for the following code:\n\n${code}`,
     //   max_tokens: 150,
     };
@@ -30,25 +31,6 @@ export async function generateDocumentation(code: string): Promise<string> {
     throw error;
   }
 }
-
- // function to convert code using GPT
-// export async function convertCode(code: string, targetLanguage: string): Promise<string> {
-// try {
-
-//     const response = await openai.completions.create({
-//       model: 'gpt-3.5-turbo', //TODO: Use an appropriate engine
-//       prompt: `Convert the following code to ${targetLanguage}:\n\n${code}`,
-//     //   max_tokens: 150,
-//     });
-
-//     // Extract the converted code from the response
-//     const convertedCode = response.choices[0].text.trim();
-
-//     return convertedCode;
-//   } catch (error) {
-//     throw error;
-//   }
-// }
 
 
 // function to convert code using GPT
@@ -66,7 +48,7 @@ export async function convertCode(code: string, targetLanguage: string): Promise
     if (response.choices && response.choices.length > 0) {
       // Use the correct property based on the type definition
       const content = response.choices[0].message?.content;
-
+      vscode.window.showInformationMessage(`${content}`);
       if (content !== undefined && content !== null) {
         const convertedCode = content.trim();
         return convertedCode;

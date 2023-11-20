@@ -6,7 +6,6 @@ import { processExpressProject } from './express/express-pocessor';
 import { authenticateWithGitHub } from './service/github.service';
 import { processDjangoProject } from './django/django-processor';
 import { convertCode } from './service/bot.service';
-import { getExpressFunctions} from './service/anthropic.service';
 
 // Import the web-streams-polyfill package and define ReadableStream globally: fixes langchain for node error
 
@@ -83,7 +82,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 async function handleCodeConversion(code: string, fileName: string, sourceLanguage: string): Promise<void> {
     const selectedLanguage = await vscode.window.showQuickPick(['JavaScript', 'TypeScript', 'Python']);
-    getExpressFunctions();
 
     if (selectedLanguage) {
         try {
@@ -91,16 +89,23 @@ async function handleCodeConversion(code: string, fileName: string, sourceLangua
                 location: vscode.ProgressLocation.Notification,
                 title: 'Converting code...',
                 cancellable: false,
-            }, async (progress) => {
+            }, async (_progress) => {
                 const convertedCode = await getConvertedCode(code, selectedLanguage, fileName, sourceLanguage);
 
                 // Generate the new file name based on the original file name and target language
                 const originalFileNameWithoutExt = path.basename(fileName, path.extname(fileName));
                 const targetFileExtension = getTargetFileExtension(selectedLanguage);
-                const newFileName = `${originalFileNameWithoutExt}_converted.${targetFileExtension}`;
+                let newFileName = `${originalFileNameWithoutExt}_converted.${targetFileExtension}`;
+                let counter = 1;
 
                 // Get the directory of the original file
                 const originalFileDir = path.dirname(fileName);
+
+                //check and see if the file already exists, if yes, then append a number
+                while (fs.existsSync(path.join(originalFileDir, newFileName))) {
+                    newFileName = `${originalFileNameWithoutExt}_converted_${counter}.${targetFileExtension}`;
+                    counter += 1;
+                }
 
                 // Create the new file path
                 const newFilePath = path.join(originalFileDir, newFileName);
@@ -124,6 +129,7 @@ async function handleCodeConversion(code: string, fileName: string, sourceLangua
 }
 
 
+
 async function getConvertedCode(code: string, targetLanguage: string, fileName: string, sourceLanguage: string): Promise<string> {
     const targetFileExtension = getTargetFileExtension(targetLanguage);
     const sourceFileExtension = path.extname(fileName).slice(1);
@@ -136,30 +142,6 @@ async function getConvertedCode(code: string, targetLanguage: string, fileName: 
     }
 
     return `// check ${path.basename(fileName, path.extname(fileName))}.${targetFileExtension} for the converted code\n\n// Converted from ${sourceLanguage} to ${targetLanguage}\n\n${code}`;
-}
-
-function createNewFile(originalFileName: string, targetLanguage: string, convertedCode: string): void {
-    // Get the directory and base name of the original file
-    const originalFileDir = path.dirname(originalFileName);
-    const originalFileNameWithoutExt = path.basename(originalFileName, path.extname(originalFileName));
-
-    // Create a new file name with the target language's extension
-    const targetFileExtension = getTargetFileExtension(targetLanguage);
-    const newFileName = `${originalFileNameWithoutExt}.${targetFileExtension}`;
-    const newFilePath = path.join(originalFileDir, newFileName);
-
-    try {
-        // Write the converted code to the new file
-        fs.writeFileSync(newFilePath, `// code converted from file.${path.extname(originalFileName).slice(1)} to file.${targetFileExtension}\n\n${convertedCode}`);
-
-        // Open the newly created file
-        vscode.workspace.openTextDocument(newFilePath).then((document) => {
-            vscode.window.showTextDocument(document);
-        });
-    } catch (error) {
-        // Handle errors related to file creation
-        vscode.window.showErrorMessage(`Error creating new file: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
 }
 
 /**

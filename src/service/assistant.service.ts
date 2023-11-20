@@ -21,14 +21,14 @@ interface DjangoView extends CommonView {
 }
 
 // function for generating documentation for Django views
-export function generateDocumentation(views: CommonView[]) {
-    // Iterating over the list of views and generate documentation
-    for (const view of views) {
-        vscode.window.showInformationMessage(`Generating documentation for View: ${view.name}`);
-    }
-}
+// export function generateDocumentation(views: CommonView[]) {
+//     // Iterating over the list of views and generate documentation
+//     for (const view of views) {
+//         vscode.window.showInformationMessage(`Generating documentation for View: ${view.name}`);
+//     }
+// }
 
-export async function assistantCreator() {
+async function assistantCreator() {
     const outputChannel = vscode.window.createOutputChannel('Controller Function Names');
 
     outputChannel.clear();
