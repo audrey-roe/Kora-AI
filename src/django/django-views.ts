@@ -8,7 +8,7 @@ export async function identifyDjangoViews(urlsFile: vscode.Uri) {
     const fileContent = await vscode.workspace.fs.readFile(urlsFile);
 
     // Using a regex to identify Django views
-    const djangoViewRegex = /\b(?:path|re_path|url)\s*\(\s*['"]([\w\/-]*)['"]\s*,\s*(\w+(\.\w+)?)\b[^\)]*\)|class\s+(\w+)\s*\([^:]*APIView\)|path\s*\(\s*['"]([\w\/-]*)['"]\s*,\s*(\w+(\.\w+)?)\b[^\)]*\)\s*,\s*name\s*=\s*['"](\w+)['"]/g;
+    const djangoViewRegex = /\b(?:path|re_path|url)\s*\(\s*['"]([\w\/-]*)['"]\s*,\s*(\w+(\.\w+)?)\b[^\)]*\)|class\s+(\w+)\s*\([^:]*APIView\)|path\s*\(\s*['"]([\w\/-]*)['"]\s*,\s*(\w+(\.\w+)?)\b[^\)]*\)\s*,\s*(?:name\s*=\s*['"](\w+)['"])?|path\s*\(\s*['"]([\w\/-]*)['"]\s*,\s*(\w+(\.\w+)?)\s*,\s*(?:name\s*=\s*['"](\w*)['"])?\)|path\s*\(\s*['"]([\w\/-]*)['"]\s*,\s*([\w.]+)\s*,\s*(?:name\s*=\s*['"](\w*)['"])?\)|path\s*\(\s*['"]([\w\/-]*)['"]\s*,\s*([\w.]+)\s*(?:,\s*name\s*=\s*['"](\w*)['"])?\)|path\s*\(\s*['"]([\w\/-]*)['"]\s*,\s*([\w.]+)\)/g;
 
     let views = [];
     let match;

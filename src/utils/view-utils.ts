@@ -43,7 +43,7 @@ export async function locateViewFunction(viewName: string): Promise<{ moduleName
             let i = index2;
             while (i < content.length) {
                 if (content[i] === ':') {
-                    const endOfFunction = await findEndOfFunction(content, i);
+                    const endOfFunction = await findEndOfClassFunction(content, i);
                     // const viewContent = content.substring(index2, endOfClass + 1);
 
                     vscode.window.showInformationMessage(`Module name: ${moduleName}, Class name: ${functionName}, Content: ${endOfFunction}`);
@@ -56,7 +56,7 @@ export async function locateViewFunction(viewName: string): Promise<{ moduleName
             let i = index3;
             while (i < content.length) {
                 if (content[i] === ':') {
-                    const endOfFunction = await findEndOfFunction(content, i);
+                    const endOfFunction = await findEndOfClassFunction(content, i);
                     // const viewContent = content.substring(index3, endOfFunction + 1);
 
                     vscode.window.showInformationMessage(`Module name: ${moduleName}, Class name: ${functionName}, Content: ${endOfFunction}`);
@@ -107,75 +107,101 @@ export function findEndOfDefFunction(content: string, startIndex: number): strin
     return nonDefLines;
 }
 
+//! MUST FIUGRE OUT
+let insideClass = false;
 
-export function findEndOfClassFunction(content: string, startIndex: number): number {
+export function findEndOfClassFunction(content: string, startIndex: number): string[] {
     let i = startIndex;
-    const nonDefLines: string[] = [];
+    const functionLines: string[] = [];
+    let continueProcessing = true;
 
-    while (i < content.length) {
-        // Find the beginning of the next line
-        const lineStart = i+1;
+    // Check if we are inside a class
+    if (content.substring(startIndex).startsWith('class ')) {
+        insideClass = true;
+    }
+
+    // If inside class, use indentation 
+    // Else use 'def' keyword
+    const nextMarker = insideClass ? /^\s+/ : /^def\s+/;
+
+    // Include the first line in functionLines
+    const firstLineStart = i;
+    while (i < content.length && content[i] !== '\n') {
+        i++;
+    }
+    i++;
+    functionLines.push(content.substring(firstLineStart, i));
+
+    while (i < content.length && continueProcessing) {
+        const lineStart = i;
         while (i < content.length && content[i] !== '\n') {
             i++;
         }
-        i++; // Move to the next character after the newline
-
-        // Check if the line is not a comment and starts with 'def'
-        const line = content.substring(lineStart, i).trim();
-        if (!line.startsWith('#') && line.startsWith('class ')) {
-            return i;
-        } else {
-            nonDefLines.push(content.substring(lineStart, i));
-        }
-    }
-
-    // Print non-'def' lines
-    vscode.window.showInformationMessage(`Non-def lines:, ${nonDefLines}`);
-
-    return -1;
-}
-
-export function findEndOfFunction(content: string, startIndex: number): number {
-    let openBraces = 0;
-    let i = startIndex;
-    let insideFunction = false;
-    let initialIndentation: number | null = null;
-    let functionContent = '';
-
-    while (i < content.length) {
-        if (content[i] === '(') {
-            openBraces++;
-            insideFunction = true;
-        } else if (content[i] === ')') {
-            openBraces--;
-
-            if (openBraces === 0 && insideFunction) {
-                if (content[i + 1] === '\n') {
-                    if (initialIndentation === null) {
-                        initialIndentation = findIndentationLevel(content, startIndex);
-                    }
-
-                    let nextLineIndex = i + 2;
-                    let nextLineIndentation = 0; 
-
-                    while (nextLineIndex < content.length && content[nextLineIndex] !== '\n') {
-                        functionContent += content[nextLineIndex];
-                        nextLineIndex++;
-                        nextLineIndentation++;
-                    }
-
-                    if (nextLineIndentation <= initialIndentation) {
-                        return nextLineIndex - 1;
-                    }
-                }
-            }
-        }
-
         i++;
+
+        // Check if the line is not a comment and starts with 'def' or has indentation in class context
+        const line = content.substring(lineStart, i).trim();
+        if (!line.startsWith('#') && (line.match(nextMarker) || (insideClass && line.startsWith('class ')))) {
+            // Found next function start or class definition inside class
+            continueProcessing = false;
+        } else {
+            functionLines.push(content.substring(lineStart, i));
+        }
     }
 
-    return -1; 
+    // Print function lines
+    vscode.window.showInformationMessage(`Function lines:, ${functionLines}`);
+
+    // Reset insideClass when we exit class scope
+    if (!insideClass && functionLines[functionLines.length - 1].includes('}')) {
+        insideClass = false;
+    }
+
+    return functionLines;
 }
+
+
+// export function findEndOfFunction(content: string, startIndex: number): number {
+//     let openBraces = 0;
+//     let i = startIndex;
+//     let insideFunction = false;
+//     let initialIndentation: number | null = null;
+//     let functionContent = '';
+
+//     while (i < content.length) {
+//         if (content[i] === '(') {
+//             openBraces++;
+//             insideFunction = true;
+//         } else if (content[i] === ')') {
+//             openBraces--;
+
+//             if (openBraces === 0 && insideFunction) {
+//                 if (content[i + 1] === '\n') {
+//                     if (initialIndentation === null) {
+//                         initialIndentation = findIndentationLevel(content, startIndex);
+//                     }
+
+//                     let nextLineIndex = i + 2;
+//                     let nextLineIndentation = 0; 
+
+//                     while (nextLineIndex < content.length && content[nextLineIndex] !== '\n') {
+//                         functionContent += content[nextLineIndex];
+//                         nextLineIndex++;
+//                         nextLineIndentation++;
+//                     }
+
+//                     if (nextLineIndentation <= initialIndentation) {
+//                         return nextLineIndex - 1;
+//                     }
+//                 }
+//             }
+//         }
+
+//         i++;
+//     }
+
+//     return -1; 
+// }
 
 export function findIndentationLevel(content: string, index: number): number {
     let i = index;
@@ -189,103 +215,4 @@ export function findIndentationLevel(content: string, index: number): number {
     return indentationLevel;
 }
 
-export async function locateExpressController(controllerName: string): Promise<{ moduleName: string, functionName: string, content: string } | undefined> {
-    const workspaceFolders = vscode.workspace.workspaceFolders;
 
-    if (!workspaceFolders || workspaceFolders.length === 0) {
-        vscode.window.showErrorMessage('Workspace path not found.');
-        return undefined;
-    }
-
-    const workspacePath = workspaceFolders[0].uri.fsPath;
-
-    const allowedExtensions = ['.ts', '.js'];
-
-    const controllerPath = controllerName.replace(/\./g, path.sep);
-
-    const parts = controllerName.split('.');
-    const moduleName = parts.slice(0, -1).join('.');
-    const functionName = parts[parts.length - 1];
-
-    const sourceFiles = await filesRecursive(workspacePath, allowedExtensions);
-
-    for (const sourceFile of sourceFiles) {
-        const content = await vscode.workspace.fs.readFile(vscode.Uri.file(sourceFile)).then(buffer => new TextDecoder().decode(buffer));
-
-        const functionRegex = new RegExp(`(?:\\b${functionName}\\s*=\\s*(?:async\\s*)?\\([^)]*\\)\\s*=>\\s*|\\b${functionName}\\s*\\([^)]*\\)\\s*(?:=>\\s*|\\{\\s*)|\\bconst\\s+${functionName}\\s*\\=|\\bexport\\s+(?:async\\s+)?(?:function\\s+)?(?:const\\s+)?\\b${functionName}\\s*\\(\\s*|\\b${functionName}\\s*\\(\\s*)`, 'g');
-
-        const matches = content.match(functionRegex);
-
-        if (matches) {
-            for (const match of matches) {
-                // Find the end of the function block
-                const startIndex = content.indexOf(match);
-                const endOfBlock = findEndOfBlock(content, startIndex);
-
-                if (endOfBlock !== -1) {
-                    const viewContent = content.substring(startIndex, endOfBlock + 1);
-                    vscode.window.showInformationMessage(`Module name: ${moduleName}, Function name: ${functionName}, Content: ${viewContent}`);
-                    return { moduleName, functionName, content: viewContent };
-                }
-            }
-        }
-    }
-
-    vscode.window.showErrorMessage(`Controller function for ${controllerName} not found.`);
-    return undefined;
-}
-
-// Function to find the ending of a block in TypeScript or JavaScript file
-export function findEndOfBlock(content: string, startIndex: number): number {
-    let openBraces = 0;
-    let i = startIndex;
-
-    while (i < content.length) {
-        if (content[i] === '{') {
-            openBraces++;
-        } else if (content[i] === '}') {
-            openBraces--;
-
-            if (openBraces === 0) {
-                return i;
-            }
-        }
-
-        i++;
-
-        // If a closing brace is encountered before an opening brace, break to avoid false positives
-        if (openBraces < 0) {
-            break;
-        }
-    }
-
-    return -1; // Not found
-}
-
-//TODO: get open ai to work so that we can remove this placeholder
-const controllers = [
-    'loginUserHandler',
-    'createUserHandler',
-    'deleteUserHandler',
-    'revokeSession',
-    'getFileHandler',
-    'streamFileController',
-    'uploadFileHandler',
-    'handleCreateFolder',
-    'markAndDeleteUnsafeFileController',
-    'getFileHistoryController',
-    'reviewFile',
-];
-
-export async function checkControllers() {
-    for (const controller of controllers) {
-        try {
-            const result = await locateExpressController(controller);
-            if (result) {
-                vscode.window.showInformationMessage(`Controller ${controller} found`);
-            }
-        } catch (error) {
-            console.error(`Error checking controller ${controller}: `, error);
-        }
-    }
-}

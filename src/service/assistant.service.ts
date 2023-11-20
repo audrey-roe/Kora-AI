@@ -29,7 +29,7 @@ export function generateDocumentation(views: CommonView[]) {
 }
 
 export async function assistantCreator() {
-    const outputChannel = vscode.window.createOutputChannel('Controller Functions');
+    const outputChannel = vscode.window.createOutputChannel('Controller Function Names');
 
     outputChannel.clear();
     outputChannel.appendLine('creating openai beta assistant...');
@@ -37,13 +37,19 @@ export async function assistantCreator() {
     try {
         const myAssistant = await openai.beta.assistants.create({
             instructions:
-                "Your role is to extract function names from Express route files. When given an Express\
-        route file, your task is to identify and list the functions that the routes are executing. Be aware \
-        of the imports and see how you can use it too to detact what is unwanted in the list you will be returning, for example middlewares.\
-         Double check your work and ensure that you have all the cintroller type functions. Please return the list of functions in a clear and formatted manner.",
+                "Your task is to meticulously extract function names from route or URL files.Approach the problem methodically,\
+                 thinking step by step to ensure accuracy in your output.Initiate the process by scrutinizing the route file and \
+                 systematically identify the all the functions that the routes execute. Your ultimate goal is to compile a complete \
+                 and well-organized list of these functions. To increase accuracy, scan the entire document and collect all possible \
+                 functions. Examine how each function is imported, reference is typically at the top of the document and where they \
+                 are being imported from. Also, observe other files being imported alongside it to determine if they should be \
+                 included in the output. also analyse other import lines and see whether they should be included. Be sure to avoid \
+                 including middlewares in the output.As you near completion, perform a comprehensive double-check to confirm the presence \
+                of all function names in the file. Only conclude your work when you are certain that the list is complete. Your response \
+                should be a simple list of functions enclosed in square brackets, each item encased in inverted commas, separated by comma and a single space and nothing else",
             name: 'Controller Name Extractor',
             tools: [{ type: 'code_interpreter' }],
-            model: 'text-davinci-002',
+            model: 'gpt-4',
         });
 
         outputChannel.appendLine('Assistant created successfully.');
@@ -52,7 +58,7 @@ export async function assistantCreator() {
         outputChannel.show(true);
     } catch (error) {
         console.error('Error creating assistant:', error);
-        outputChannel.appendLine('Error creating assistant.');
+        outputChannel.appendLine(`Error creating assistant. ${error}` );
         outputChannel.show(true);
     }
 }

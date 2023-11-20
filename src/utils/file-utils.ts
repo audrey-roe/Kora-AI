@@ -30,6 +30,5 @@ export function isCommentedOut(content: string, index: number): boolean {
             return true;
         }
     }
-
     return false;
 }
