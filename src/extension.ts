@@ -67,7 +67,7 @@ export function activate(context: vscode.ExtensionContext) {
             // Check if there is a selection
             const selection = editor.selection;
             if (!selection.isEmpty) {
-                
+
                 const selectedCode = editor.document.getText(selection);
 
                 handleCodeConversion(selectedCode, editor.document.fileName, editor.document.languageId);
@@ -87,31 +87,42 @@ async function handleCodeConversion(code: string, fileName: string, sourceLangua
 
     if (selectedLanguage) {
         try {
+            await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: 'Converting code...',
+                cancellable: false,
+            }, async (progress) => {
+                const convertedCode = await getConvertedCode(code, selectedLanguage, fileName, sourceLanguage);
 
-            const convertedCode = await getConvertedCode(code, selectedLanguage, fileName, sourceLanguage);
-            const activeEditor = vscode.window.activeTextEditor;
+                // Generate the new file name based on the original file name and target language
+                const originalFileNameWithoutExt = path.basename(fileName, path.extname(fileName));
+                const targetFileExtension = getTargetFileExtension(selectedLanguage);
+                const newFileName = `${originalFileNameWithoutExt}_converted.${targetFileExtension}`;
 
-            if (activeEditor) {
-                await activeEditor.edit((editBuilder) => {
-                    editBuilder.replace(
-                        new vscode.Range(
-                            new vscode.Position(0, 0),
-                            activeEditor.document.lineAt(activeEditor.document.lineCount - 1).rangeIncludingLineBreak.end
-                        ),
-                        convertedCode
-                    );
+                // Get the directory of the original file
+                const originalFileDir = path.dirname(fileName);
+
+                // Create the new file path
+                const newFilePath = path.join(originalFileDir, newFileName);
+
+                // Write the converted code to the new file
+                fs.writeFileSync(newFilePath, `// code converted from ${sourceLanguage} to ${selectedLanguage}\n\n${convertedCode}`);
+
+                // Open the newly created file
+                vscode.workspace.openTextDocument(newFilePath).then((document) => {
+                    vscode.window.showTextDocument(document);
                 });
 
-                createNewFile(fileName, selectedLanguage, convertedCode);
-            } else {
-                vscode.window.showErrorMessage('No active text editor found.');
-            }
+                // Show success message
+                vscode.window.showInformationMessage('Code converted successfully!');
+            });
         } catch (error) {
             // Handle errors related to code conversion
             vscode.window.showErrorMessage(`Error converting code: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 }
+
 
 async function getConvertedCode(code: string, targetLanguage: string, fileName: string, sourceLanguage: string): Promise<string> {
     const targetFileExtension = getTargetFileExtension(targetLanguage);
@@ -124,7 +135,7 @@ async function getConvertedCode(code: string, targetLanguage: string, fileName: 
         throw error;
     }
 
-    return `// check file.${targetFileExtension} for the converted code\n\n// Converted from ${sourceLanguage} to ${targetLanguage}\n\n${code}`;
+    return `// check ${path.basename(fileName, path.extname(fileName))}.${targetFileExtension} for the converted code\n\n// Converted from ${sourceLanguage} to ${targetLanguage}\n\n${code}`;
 }
 
 function createNewFile(originalFileName: string, targetLanguage: string, convertedCode: string): void {
@@ -174,7 +185,7 @@ class PolyglotCodeActionProvider implements vscode.CodeActionProvider {
         if (editor) {
             const selection = editor.selection;
             if (!selection.isEmpty) {
-                
+
                 // If text is selected, offer the code action to convert the selected code
                 const convertAction = new vscode.CodeAction('Kora AI: Convert Selected Code', vscode.CodeActionKind.QuickFix);
                 convertAction.command = {
