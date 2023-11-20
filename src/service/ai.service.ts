@@ -20,24 +20,37 @@ interface ControllerDictionary {
     [controllerName: string]: string;
 }
 
-//TODO: There are too many nested conditionals, treat when cleaning up the code.
+//TODO: There are too many nested conditionals, treat when cleaning u
 export async function extractControllers(document: any): Promise<ControllerDictionary | undefined> {
     const routeContent = document.getText();
 
-    const prompt = `Your task is to meticulously extract function names and their corresponding URLs from route or URL files. 
+    const prompt = `Your task is to meticulously extract function names, their corresponding URLs, and methods from route or URL files. 
     Approach the problem methodically, thinking step by step to ensure accuracy in your output.
 
     Initiate the process by scrutinizing the route file and systematically identify all the functions that the routes execute. 
-    Your ultimate goal is to compile a complete and well-organized dictionary of these functions, where the key is the controller name and 
-    the value is the corresponding URL. To increase accuracy, scan the entire document and collect all possible functions. 
+    Your ultimate goal is to compile a complete and well-organized list, where each item in the list follows this order:
+    1. The route URL (encased in single inverted commas),
+    2. The method (encased in single inverted commas),
+    3. The controller function name (encased in single inverted commas).
+
+    To increase accuracy, scan the entire document and collect all possible functions. 
     Examine how each function is imported; the reference is typically at the top of the document and where they are being imported from. 
     Also, observe other files being imported alongside it to determine if they should be included in the output. 
     Analyze other import lines and see whether they should be included. Be sure to avoid including middlewares in the output.
 
     As you near completion, perform a comprehensive double-check to confirm the presence of all function names in the file. 
     Only conclude your work when you are certain that the dictionary is complete. 
-    Your response should be a dictionary where the key is the controller name (encased in single inverted commas) and 
-    the value is the corresponding URL, enclosed in curly braces and separated by commas and a single space:\n\n${routeContent}`;
+    Your response should be a dictionary where each key is the controller name, and the value is a list containing the route URL, method, 
+    and the controller function name (matching the key controller name), enclosed in square brackets and separated by commas and a single space. here is an example below:
+
+    {
+        'exampleController1': ['/route1', 'GET', 'exampleController1'],
+        'exampleController2': ['/route2', 'POST', 'exampleController2'],
+        // ... other controllers ...
+    };
+    Avoid adding 'Output' or 'Answer' or anything thing else before the , only the list is required as output:
+    \n\n${routeContent}`;
+
 
     try {
         const completionParams = {
@@ -59,6 +72,7 @@ export async function extractControllers(document: any): Promise<ControllerDicti
                 const match = responseText.match(/{[^{}]*}/);
 
                 if (match) {
+                    // Extract the matched JSON string and parse it
                     const jsonString = match[0].replace(/'/g, '"');
                     vscode.window.showInformationMessage(`Parsed JSON String: ${jsonString}`);
 
@@ -91,3 +105,4 @@ export async function extractControllers(document: any): Promise<ControllerDicti
         vscode.window.showErrorMessage(`Error communicating with OpenAI API. ${error}`);
     }
 }
+

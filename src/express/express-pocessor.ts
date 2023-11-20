@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { extractControllers } from '../service/ai.service';
 import { filesRecursive } from '../utils/file-utils';
-import { assistantCreator } from '../service/assistant.service';
 
 export async function processExpressProject() {
     try {

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { identifyDjangoViews } from './django-views';
-import { generateDocumentation } from '../service/assistant.service';
+import { generateDocumentation } from '../service/bot.service';
 
 
 export async function processDjangoProject() {
@@ -12,7 +12,7 @@ export async function processDjangoProject() {
 
         if (views) {
             // Use the 'views' array to generate documentation or perform other tasks.
-            generateDocumentation(views);
+            // generateDocumentation(views);
         }
     }
 }

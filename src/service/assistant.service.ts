@@ -1,32 +1,8 @@
 import * as vscode from 'vscode';
 import { openai } from './ai.service';
 
-// CommonView interface
-interface CommonView {
-    name: string;
-    content: {
-        moduleName: string;
-        functionName: string;
-        content: string;
-    } | string;
-}
 
-// DjangoView interface
-interface DjangoView extends CommonView {
-    content: {
-        moduleName: string;
-        functionName: string;
-        content: string;
-    } | string;
-}
 
-// function for generating documentation for Django views
-// export function generateDocumentation(views: CommonView[]) {
-//     // Iterating over the list of views and generate documentation
-//     for (const view of views) {
-//         vscode.window.showInformationMessage(`Generating documentation for View: ${view.name}`);
-//     }
-// }
 
 async function assistantCreator() {
     const outputChannel = vscode.window.createOutputChannel('Controller Function Names');
