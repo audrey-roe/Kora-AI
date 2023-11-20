@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 
 // Function to recursively find files with specified extensions
-export async function filesRecursive(directory: string, allowedExtensions: string[], excludedFolders: string[] = ['node_modules', 'dist', 'out', 'lib'], testFilePattern: RegExp = /\.(test|spec)\.(ts|js|py)$/): Promise<string[]> {
+export async function filesRecursive(directory: string, allowedExtensions: string[], excludedFolders: string[] = ['node_modules', 'dist', 'out', 'lib', 'venv', 'site-package'], testFilePattern: RegExp = /\.(test|spec)\.(ts|js|py)$/): Promise<string[]> {
     let fileArray: string[] = [];
 
     const files = await vscode.workspace.fs.readDirectory(vscode.Uri.file(directory));

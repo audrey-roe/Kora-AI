@@ -19,7 +19,7 @@ export async function locateViewFunction(viewName: string): Promise<{ moduleName
 
     const parts = viewName.split('.');
     const moduleName = parts.slice(0, -1).join('.');
-    const functionName = parts[parts.length - 1];
+    const functionName = parts[parts.length - 1]|| '';
 
     const pythonFiles = await filesRecursive(workspacePath, allowedExtensions);
     const viewFunctionRegex = new RegExp(`(?:def\\s+${functionName}\\s*\\([^:]*:\\s*|class\\s+${functionName}\\s*(?:\\([^)]*\\))?\\s*(?:\\b(?:APIView)\\b)?\\s*:\\s*)[^]*?(?=(?:\\s*class\\s+|\\s*def\\s+))|(?=$)`, 'g');
@@ -33,21 +33,21 @@ export async function locateViewFunction(viewName: string): Promise<{ moduleName
 
         if (index !== -1) {
             // Handle def ${functionName}(
-            const endOfFunction = await findEndOfFunction(content, index);
-            const viewContent = content.substring(index, endOfFunction + 1);
+            const endOfFunction = await findEndOfDefFunction(content, index);
+            // const viewContent = content.substring(index, endOfFunction + 1);
 
-            vscode.window.showInformationMessage(`Module name: ${moduleName}, Function name: ${functionName}, Content: ${viewContent}`);
-            return { moduleName, functionName, content: viewContent };
+            vscode.window.showInformationMessage(`Module name: ${moduleName}, Function name: ${functionName}, Content: ${endOfFunction}`);
+            // return { moduleName, functionName, content: viewContent };
         } else if (index2 !== -1) {
             // Handle class ${functionName}(
             let i = index2;
             while (i < content.length) {
                 if (content[i] === ':') {
-                    const endOfClass = await findEndOfFunction(content, i);
-                    const viewContent = content.substring(index2, endOfClass + 1);
+                    const endOfFunction = await findEndOfFunction(content, i);
+                    // const viewContent = content.substring(index2, endOfClass + 1);
 
-                    vscode.window.showInformationMessage(`Module name: ${moduleName}, Class name: ${functionName}, Content: ${viewContent}`);
-                    return { moduleName, functionName, content: viewContent };
+                    vscode.window.showInformationMessage(`Module name: ${moduleName}, Class name: ${functionName}, Content: ${endOfFunction}`);
+                    // return { moduleName, functionName, content: viewContent };
                 }
                 i++;
             }
@@ -57,21 +57,84 @@ export async function locateViewFunction(viewName: string): Promise<{ moduleName
             while (i < content.length) {
                 if (content[i] === ':') {
                     const endOfFunction = await findEndOfFunction(content, i);
-                    const viewContent = content.substring(index3, endOfFunction + 1);
+                    // const viewContent = content.substring(index3, endOfFunction + 1);
 
-                    vscode.window.showInformationMessage(`Module name: ${moduleName}, Class name: ${functionName}, Content: ${viewContent}`);
-                    return { moduleName, functionName, content: viewContent };
+                    vscode.window.showInformationMessage(`Module name: ${moduleName}, Class name: ${functionName}, Content: ${endOfFunction}`);
+                    // return { moduleName, functionName, content: endOfFunction };
                 }
                 i++;
             }
         }
     }
-
     vscode.window.showErrorMessage(`View function for ${viewName} not found.`);
     return undefined;
 }
 
 // finding end of python function
+export function findEndOfDefFunction(content: string, startIndex: number): string[] {
+    let i = startIndex;
+    const nonDefLines: string[] = [];
+    let continueProcessing = true;
+
+    // Move to the next line after the provided startIndex
+    while (i < content.length && content[i] !== '\n') {
+        
+        i++;
+    }
+    i++;
+    nonDefLines.push(content.substring(startIndex, i));
+
+    while (i < content.length && continueProcessing) {
+        const lineStart = i;
+        
+        while (i < content.length && content[i] !== '\n') {
+            i++;
+        }
+        i++;
+
+        // Check if the line is not a comment and starts with 'def' or 'class'
+        const line = content.substring(lineStart, i).trim();
+        if (!line.startsWith('#') && (line.startsWith('def ') || line.startsWith('class '))) {
+            continueProcessing = false; // Exit the loop when 'def' or 'class' is found
+        } else {
+            nonDefLines.push(content.substring(lineStart, i));
+        }
+    }
+
+    // Print non-'def' lines
+    vscode.window.showInformationMessage(`Non-def lines:, ${nonDefLines}`);
+
+    return nonDefLines;
+}
+
+
+export function findEndOfClassFunction(content: string, startIndex: number): number {
+    let i = startIndex;
+    const nonDefLines: string[] = [];
+
+    while (i < content.length) {
+        // Find the beginning of the next line
+        const lineStart = i+1;
+        while (i < content.length && content[i] !== '\n') {
+            i++;
+        }
+        i++; // Move to the next character after the newline
+
+        // Check if the line is not a comment and starts with 'def'
+        const line = content.substring(lineStart, i).trim();
+        if (!line.startsWith('#') && line.startsWith('class ')) {
+            return i;
+        } else {
+            nonDefLines.push(content.substring(lineStart, i));
+        }
+    }
+
+    // Print non-'def' lines
+    vscode.window.showInformationMessage(`Non-def lines:, ${nonDefLines}`);
+
+    return -1;
+}
+
 export function findEndOfFunction(content: string, startIndex: number): number {
     let openBraces = 0;
     let i = startIndex;

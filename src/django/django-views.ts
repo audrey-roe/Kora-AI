@@ -26,7 +26,7 @@ export async function identifyDjangoViews(urlsFile: vscode.Uri) {
         if (viewName && !viewName.includes('include') && path !== 'admin/' && !isCommentedOut(fileContentString, match.index) && !isWithinVirtualEnv(filePath)) {
             vscode.window.showInformationMessage(`Django View identified - Path: ${path}, View Name: ${viewName}, File Path: ${filePath}`);
 
-            // Call locateViewFunction to get the content of the view function
+            // Calling locateViewFunction to get the content of the view function
             const viewContent = await locateViewFunction(viewName);
 
             // vscode.window.showInformationMessage(`View content ${viewContent}`); //Debbuging line
