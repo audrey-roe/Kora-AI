@@ -20,7 +20,6 @@ export interface ControllerDictionary {
     [controllerName: string]: [string, string, string];
 }
 
-//TODO: There are too many nested conditionals, treat when cleaning up
 export async function extractControllers(document: any): Promise<ControllerDictionary | undefined> {
     const routeContent = document.getText();
 

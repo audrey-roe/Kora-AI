@@ -110,7 +110,7 @@ export async function convertCode(code: string, targetLanguage: string): Promise
 
     // Check if choices array exists and is not empty
     if (response.choices && response.choices.length > 0) {
-      // Use the correct property based on the type definition
+
       const content = response.choices[0].message?.content;
       vscode.window.showInformationMessage(`${content}`);
       if (content !== undefined && content !== null) {

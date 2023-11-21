@@ -89,7 +89,7 @@ async function handleCodeConversion(code: string, fileName: string, sourceLangua
                 location: vscode.ProgressLocation.Notification,
                 title: 'Converting code...',
                 cancellable: false,
-            }, async (_progress) => {
+            }, async (progress) => {
                 const convertedCode = await getConvertedCode(code, selectedLanguage, fileName, sourceLanguage);
 
                 // Generate the new file name based on the original file name and target language

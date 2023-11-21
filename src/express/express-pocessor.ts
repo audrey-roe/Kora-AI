@@ -19,7 +19,7 @@ export async function processExpressProject() {
                     // Extract keys from the dictionary
                     if (apiResponse) {
                         const controllers: string[] = Object.keys(apiResponse);
-                        // vscode.window.showInformationMessage(`controllers: ${controllers}`);
+
                         await checkControllers(controllers, apiResponse);
                         
                     } else {
@@ -87,7 +87,7 @@ async function locateExpressController(controllerName: string): Promise<{ module
 
                 if (endOfBlock !== -1) {
                     const viewContent = content.substring(startIndex, endOfBlock + 1);
-                    vscode.window.showInformationMessage(`Module name: ${moduleName}, Function name: ${functionName}, Content: ${viewContent}`);
+
                     return { moduleName, functionName, content: viewContent };
                 }
             }
@@ -116,7 +116,7 @@ function findEndOfBlock(content: string, startIndex: number): number {
 
         i++;
 
-        // If a closing brace is encountered before an opening brace, break to avoid false positives
+        // If a closing brace is encountered before an opening brace, breaking to avoid false positives
         if (openBraces < 0) {
             break;
         }
@@ -134,7 +134,6 @@ async function checkControllers(controllers: string[] | undefined, apiResponse: 
 
     for (const controller of controllers) {
         try {
-            // vscode.window.showInformationMessage(`controller: ${controller}`);
 
             // Check if the controller exists in apiResponse
             if (apiResponse.hasOwnProperty(controller)) {
@@ -145,7 +144,7 @@ async function checkControllers(controllers: string[] | undefined, apiResponse: 
                 if (result) {
                     const documentation = await generateDocumentation(functionName, method, endpointURL, result.content);
 
-                    vscode.window.showInformationMessage(`${functionName} ${method} ${endpointURL} ${result.content}`);
+                    // vscode.window.showInformationMessage(`${functionName} ${method} ${endpointURL} ${result.content}`);
                     appendDocumentationToMarkdown(documentation);
 
                 }
@@ -169,7 +168,7 @@ function appendDocumentationToMarkdown(documentation: string) {
             return;
         }
 
-        // Generate the filename
+        //Generate the filename
         const fileName = `${workspaceRoot}/documentation.md`;
 
         // If the documentation file hasn't been created in this execution, create it
@@ -185,6 +184,4 @@ function appendDocumentationToMarkdown(documentation: string) {
         throw error;
     }
 }
-
-
 
