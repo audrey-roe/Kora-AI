@@ -41,7 +41,7 @@ Kora AI contributes the following settings:
 
 ## Known Issues
 
-No known issues at the moment. Please report any encountered problems on the [GitHub repository](https://github.com/yourusername/Kora AI).
+No known issues at the moment. Please report any encountered problems on the [GitHub repository](https://github.com/audrey-roe/Kora AI).
 
 ## Release Notes
 
